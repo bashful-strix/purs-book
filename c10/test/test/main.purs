@@ -49,6 +49,8 @@ import Test.Cp10.URI (_encodeURIComponent)
 import Test.Cp10.Solutions
   ( volumeFn
   , volumeArrow
+
+  , cumulativeSumsComplex
   )
 
 main :: Effect Unit
@@ -182,3 +184,17 @@ main = runSpecAndExitProcess [ consoleReporter ] do
 
       it "1 0 3" do
         volumeArrow 1.0 0.0 3.0 `shouldEqual` 0.0
+
+  describe "Exercise Group - Passing Simple Types" do
+    describe "Exercise - cumulativeSumsComplex" do
+      it "sequential" do
+        cumulativeSumsComplex
+          [ { real: 1.0, imag: 2.0 }
+          , { real: 3.0, imag: 4.0 }
+          , { real: 5.0, imag: 6.0 }
+          ]
+          `shouldEqual`
+            [ { real: 1.0, imag: 2.0 }
+            , { real: 4.0, imag: 6.0 }
+            , { real: 9.0, imag: 12.0 }
+            ]

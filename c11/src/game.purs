@@ -3,7 +3,7 @@ module Cp11.Game where
 import Prelude
 
 import Control.Monad.RWS.Trans (RWST)
-import Control.Monad.Except (Except)
+import Control.Monad.Except (Except, throwError)
 import Control.Monad.Reader (ask)
 import Control.Monad.State (get, modify_, put)
 import Control.Monad.Writer (tell)
@@ -115,7 +115,9 @@ game [ "debug" ] = do
     tell (L.singleton (show state))
   else tell (L.singleton "Not running in debug mode.")
 game [ "cheat" ] = do
-  cheat
+  GameEnvironment { cheatMode } <- ask
+  if cheatMode then cheat
+  else throwError (L.singleton "Not running in cheat mode.")
 game [] = pure unit
 game _ = tell (L.singleton "I don't understand.")
 

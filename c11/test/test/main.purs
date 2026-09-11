@@ -215,7 +215,7 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       runGame testGame = runExcept $ runRWST testGame env initialGameState
 
       env = GameEnvironment
-        { debugMode: false, playerName: "Phil" }
+        { cheatMode: false, debugMode: false, playerName: "Phil" }
 
       playerHasAllItems (GameState { inventory }) = inventory == S.fromFoldable
         [ Candle, Matches ]

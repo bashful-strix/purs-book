@@ -5,6 +5,7 @@ import Prelude
 import Control.Monad.RWS (RWSResult(..), runRWST)
 import Control.Monad.Except (runExcept)
 
+import Data.Either (Either(..))
 import Data.Foldable (fold, for_)
 import Data.Newtype (wrap)
 import Data.String (split)
@@ -19,6 +20,7 @@ import Options.Applicative as OP
 
 import Cp11.Data.GameEnvironment (GameEnvironment, gameEnvironment)
 import Cp11.Data.GameState (GameState, initialGameState)
+
 import Cp11.Game (game)
 
 runGame :: GameEnvironment -> Effect Unit
@@ -54,7 +56,7 @@ main = OP.customExecParser prefs argParser >>= runGame
   argParser = OP.info (env <**> OP.helper) parserOptions
 
   env :: OP.Parser GameEnvironment
-  env = gameEnvironment <$> player <*> debug
+  env = gameEnvironment <$> player <*> debug <*> cheat
 
   player :: OP.Parser String
   player = OP.strOption $ fold
@@ -69,6 +71,13 @@ main = OP.customExecParser prefs argParser >>= runGame
     [ OP.long "debug"
     , OP.short 'd'
     , OP.help "Use debug mode"
+    ]
+
+  cheat :: OP.Parser Boolean
+  cheat = OP.switch $ fold
+    [ OP.long "cheat"
+    , OP.short 'c'
+    , OP.help "Use cheat mode"
     ]
 
   prefs = OP.prefs OP.showHelpOnEmpty

@@ -7,8 +7,10 @@ import Data.List (List(..), (:))
 
 import Effect (Effect)
 
+import Partial.Unsafe (unsafePartial)
+
 import Test.Spec (describe, it, parallel, pending)
-import Test.Spec.Assertions (shouldEqual, shouldNotEqual)
+import Test.Spec.Assertions (shouldContain, shouldEqual, shouldNotEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
 
@@ -23,6 +25,11 @@ import Test.Cp6.Solutions
   , OneMore(..)
   , dedupShapes
   , dedupShapesFast
+
+  , unsafeMaximum
+  , act
+  , Multiply(..)
+  , Self(..)
   )
 
 main :: Effect Unit
@@ -168,3 +175,79 @@ main = runSpecAndExitProcess [ consoleReporter ] $ parallel do
 
     it "dedupShapesFast" do
       dedupShapesFast withDups `shouldEqual` noDups
+
+  describe "Multi Parameter Type Classes " do
+    it "unsafeMaximum" do
+      (unsafePartial $ unsafeMaximum [ 1, 2, 42, 3 ]) `shouldEqual` 42
+
+    let
+      m1 = Multiply 3
+      m2 = Multiply 4
+
+    -- Getting Multiply Int to work is a warm-up
+    describe "Action Multiply Int" do
+      let a = 5
+
+      it "act mempty" do
+        act (mempty :: Multiply) a `shouldEqual` a
+
+      it "act appended" do
+        act (m1 <> m2) a `shouldEqual` (act m1 (act m2 a))
+
+      it "concrete" do
+        [ 1, 15, 125 ] `shouldContain` act m1 a
+
+    -- Multiply String is the actual exercise question
+    describe "Action Multiply String" do
+      let a = "foo"
+
+      it "act mempty" do
+        act (mempty :: Multiply) a `shouldEqual` a
+
+      it "act appended" do
+        act (m1 <> m2) a `shouldEqual` (act m1 (act m2 a))
+
+      it "concrete" do
+        act m1 a `shouldEqual` "foofoofoo"
+
+    describe "Action m (Array a)" do
+      describe "Action Multiply (Array Int)" do
+        let a = [ 1, 2, 3 ]
+
+        it "act mempty" do
+          act (mempty :: Multiply) a `shouldEqual` a
+
+        it "act appended" do
+          act (m1 <> m2) a `shouldEqual` (act m1 (act m2 a))
+
+        it "concrete" do
+          [ [ 0, 0, 1 ], [ 3, 6, 9 ], [ 1, 8, 27 ] ]
+            `shouldContain` act m1 a
+
+      describe "Action Multiply (Array String)" do
+        let a = [ "foo", "bar", "baz" ]
+
+        it "act mempty" do
+          act (mempty :: Multiply) a `shouldEqual` a
+
+        it "act appended" do
+          act (m1 <> m2) a `shouldEqual` (act m1 (act m2 a))
+
+        it "concrete" do
+          act m1 a `shouldEqual`
+            [ "foofoofoo"
+            , "barbarbar"
+            , "bazbazbaz"
+            ]
+
+    describe "Action m (Self m)" do
+      let a = Self m1
+
+      it "act mempty" do
+        act (mempty :: Multiply) a `shouldEqual` a
+
+      it "act appended" do
+        act (m1 <> m2) a `shouldEqual` (act m1 (act m2 a))
+
+      it "concrete" do
+        act m2 a `shouldEqual` (Self (Multiply 12))

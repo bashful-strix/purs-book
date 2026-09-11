@@ -3,8 +3,10 @@ module Test.Cp6.Solutions where
 import Prelude
 
 import Data.Array (nub, nubEq)
-import Data.Foldable (class Foldable, foldMap, foldl, foldr)
+import Data.Foldable (class Foldable, foldMap, foldl, foldr, maximum)
 import Data.Generic.Rep (class Generic)
+import Data.Maybe (fromJust)
+import Data.Monoid (power)
 import Data.Newtype (class Newtype, over2, wrap)
 import Data.Ord.Generic (genericCompare)
 import Data.Show.Generic (genericShow)
@@ -118,5 +120,53 @@ instance Foldable f => Foldable (OneMore f) where
   foldr f b (OneMore a as) = f a (foldr f b as)
   foldl f b (OneMore a as) = foldl f (f b a) as
   foldMap f (OneMore a as) = f a <> foldMap f as
+
+-- }}}
+
+-- ex 4 {{{
+
+unsafeMaximum :: Partial => Array Int -> Int
+unsafeMaximum = fromJust <<< maximum
+
+class Monoid m <= Action m a where
+  act :: m -> a -> a
+
+newtype Multiply = Multiply Int
+
+derive newtype instance Show Multiply
+derive newtype instance Eq Multiply
+
+instance Semigroup Multiply where
+  append (Multiply a) (Multiply b) = Multiply (a * b)
+
+instance Monoid Multiply where
+  mempty = Multiply 1
+
+instance Action Multiply Int where
+  act (Multiply a) x = a * x
+
+-- valid but not accepted
+-- act _ x = x
+
+-- act (Multiply a) x = x / a
+
+-- act (Multiply a) x = pow x a
+
+-- act (Multiply a) 1 = a
+-- act a x = act (a <> Multiply x) 1
+
+instance Action Multiply String where
+  act (Multiply a) x = power x a
+
+instance Action m a => Action m (Array a) where
+  act a xs = act a <$> xs
+
+newtype Self m = Self m
+
+derive newtype instance Show m => Show (Self m)
+derive newtype instance Eq m => Eq (Self m)
+
+instance Monoid m => Action m (Self m) where
+  act a (Self b) = Self (a <> b)
 
 -- }}}

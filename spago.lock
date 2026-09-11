@@ -40,6 +40,25 @@
             "spec-node"
           ]
         }
+      },
+      "c04": {
+        "path": "c04",
+        "core": {
+          "dependencies": [
+            "console",
+            "effect",
+            "foldable-traversable",
+            "numbers",
+            "prelude"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "integers",
+            "spec",
+            "spec-node"
+          ]
+        }
       }
     },
     "package_set": {

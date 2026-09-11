@@ -134,6 +134,32 @@
             "transformers"
           ]
         }
+      },
+      "c08": {
+        "path": "c08",
+        "core": {
+          "dependencies": [
+            "console",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "prelude",
+            "strings",
+            "validation"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "control",
+            "exceptions",
+            "integers",
+            "lists",
+            "numbers",
+            "spec",
+            "spec-node",
+            "st"
+          ]
+        }
       }
     },
     "package_set": {

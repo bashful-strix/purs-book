@@ -3,7 +3,7 @@ module Test.Cp5.Solutions where
 import Prelude
 
 import Control.Alternative (guard)
-import Data.Array ((:), (..), filter, length, uncons)
+import Data.Array ((:), (..), filter, foldl, length, uncons)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested (type (/\), (/\))
 
@@ -65,5 +65,32 @@ primeFactors = factorise 2
   factorise x n
     | n `mod` x == 0 = x : factorise x (n / x)
     | otherwise = factorise (x + 1) n
+
+-- }}}
+
+-- ex 4 {{{
+
+fil :: ∀ a. (a -> Boolean) -> Array a -> Array a
+fil pred = foldl
+  (\filtered a -> if pred a then filtered <> [ a ] else filtered)
+  []
+
+allTrue :: Array Boolean -> Boolean
+-- allTrue = fold
+allTrue = foldl (&&) true
+
+fibTailRec :: Int -> Int
+fibTailRec 0 = 0
+fibTailRec 1 = 1
+fibTailRec n = go 2 1 0
+  where
+  go n' a b
+    | n' == n = a + b
+    | otherwise = go (n' + 1) (a + b) a
+
+reverse :: ∀ a. Array a -> Array a
+reverse = foldl (flip (:)) []
+
+-- reverse = foldl (\rev a -> a : rev) []
 
 -- }}}

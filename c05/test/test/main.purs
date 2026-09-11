@@ -42,6 +42,10 @@ import Test.Cp5.Solutions
   , cartesianProduct
   , triples
   , primeFactors
+
+  , allTrue
+  , fibTailRec
+  , reverse
   )
 
 fn :: Maybe Int -> Maybe Int -> Maybe Int
@@ -244,6 +248,34 @@ main = runSpecAndExitProcess [ consoleReporter ] do
         primeFactorsTest 6 [ 3, 2 ]
         primeFactorsTest 18 [ 3, 3, 2 ]
         primeFactorsTest 210 [ 7, 5, 3, 2 ]
+
+  describe "Exercise Group - Folds and Tail Recursion" do
+    describe "Exercise - allTrue" do
+      it "all elements true"
+        $ allTrue [ true, true, true ] `shouldEqual` true
+
+      it "some elements false"
+        $ allTrue [ true, false, true ] `shouldEqual` false
+
+    describe "Exercise - fibTailRec" do
+      it "Verify 0" do
+        fibTailRec 0 `shouldEqual` 0
+
+      it "Verify 9" do
+        fibTailRec 9 `shouldEqual` 34
+
+      it "Verify 44" do
+        fibTailRec 44 `shouldEqual` 701408733
+
+    describe "Exercise - reverse" do
+      it "Empty Array" do
+        reverse [] `shouldEqual` ([] :: Array Int)
+
+      it "Singleton Array" do
+        reverse [ 1 ] `shouldEqual` [ 1 ]
+
+      it "More than 1 element" do
+        reverse [ 1, 2, 3 ] `shouldEqual` [ 3, 2, 1 ]
 allFileAndDirectoryNames :: Array (String)
 allFileAndDirectoryNames =
   [ "/"

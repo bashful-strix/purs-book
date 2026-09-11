@@ -59,3 +59,28 @@ fromSingleton _ [ a ] = a
 fromSingleton a0 _ = a0
 
 -- }}}
+
+-- ex 4 {{{
+
+newtype Volt = Volt Number
+newtype Ohm = Ohm Number
+newtype Amp = Amp Number
+newtype Watt = Watt Number
+
+calculateCurrent :: Volt -> Ohm -> Amp
+calculateCurrent (Volt v) (Ohm 0.0) = Amp v
+calculateCurrent (Volt v) (Ohm r) = Amp (v / r)
+
+calculateWattage :: Amp -> Volt -> Watt
+calculateWattage (Amp a) (Volt v) = Watt (a * v)
+
+battery :: Volt
+battery = Volt 1.5
+
+lightbulb :: Ohm
+lightbulb = Ohm 500.0
+
+current :: Amp
+current = calculateCurrent battery lightbulb
+
+-- }}}

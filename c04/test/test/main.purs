@@ -18,6 +18,11 @@ import Cp4.ChapterExamples
 
   , sameCity
   , fromSingleton
+
+  , Amp(..)
+  , Volt(..)
+  , Watt(..)
+  , calculateWattage
   )
 import Cp4.Data.Person (Person)
 import Cp4.Data.Picture
@@ -128,3 +133,7 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       shapeText (Circle origin 1.0) `shouldEqual` Nothing
       shapeText (Rectangle origin 1.0 1.0) `shouldEqual` Nothing
       shapeText (Line origin { x: 1.0, y: 1.0 }) `shouldEqual` Nothing
+  describe "Exercise Group - Newtype" do
+    it "Exercise - calculateWattage" do
+      let (Watt w) = calculateWattage (Amp 0.5) (Volt 120.0)
+      w `shouldEqual` 60.0

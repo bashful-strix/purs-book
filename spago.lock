@@ -109,6 +109,31 @@
             "spec-node"
           ]
         }
+      },
+      "c07": {
+        "path": "c07",
+        "core": {
+          "dependencies": [
+            "console",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "prelude",
+            "strings",
+            "validation"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "arrays",
+            "integers",
+            "lists",
+            "maybe",
+            "spec",
+            "spec-node",
+            "transformers"
+          ]
+        }
       }
     },
     "package_set": {
@@ -1845,6 +1870,19 @@
       "version": "6.0.0",
       "integrity": "sha256-0L1QsaY20OILjfU5TV72d3U/tSjhmL9hJ32WMp857Lk=",
       "dependencies": []
+    },
+    "validation": {
+      "type": "registry",
+      "version": "6.0.0",
+      "integrity": "sha256-wavSVs3zeQmO3iXJJlhyQuDOh6w3ngO3gwWqcwekG/U=",
+      "dependencies": [
+        "bifunctors",
+        "control",
+        "either",
+        "foldable-traversable",
+        "newtype",
+        "prelude"
+      ]
     }
   }
 }

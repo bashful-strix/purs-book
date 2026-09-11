@@ -62,6 +62,27 @@
             "spec-node"
           ]
         }
+      },
+      "c05": {
+        "path": "c05",
+        "core": {
+          "dependencies": [
+            "arrays",
+            "console",
+            "control",
+            "effect",
+            "foldable-traversable",
+            "maybe",
+            "prelude"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "spec",
+            "spec-node",
+            "tuples"
+          ]
+        }
       }
     },
     "package_set": {

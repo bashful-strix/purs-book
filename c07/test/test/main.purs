@@ -5,12 +5,17 @@ import Prelude
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.Maybe (Maybe(..))
+import Data.String.Regex (test)
+import Data.Validation.Semigroup (invalid)
+
 import Effect (Effect)
 
 import Test.Spec (describe, it, parallel, pending)
 import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
+
+import Cp7.Data.AddressBook (address)
 
 import Test.Cp7.Solutions
   ( addMaybe
@@ -22,6 +27,10 @@ import Test.Cp7.Solutions
   , mulApply
   , subApply
   , combineMaybe
+
+  , stateRegex
+  , nonEmptyRegex
+  , validateAddressImproved
   )
 
 main :: Effect Unit
@@ -108,3 +117,51 @@ main = runSpecAndExitProcess [ consoleReporter ] $ parallel do
         it "Nothing" do
           combineMaybe (Nothing :: Maybe (List Char))
             `shouldEqual` (Nothing : Nil)
+
+  describe "Exercise Group - Applicative Validation" do
+    describe "Exercise - stateRegex" do
+      let
+        stateTest str exp = it str do
+          test stateRegex str `shouldEqual` exp
+
+      stateTest "CA" true
+      stateTest "Ca" true
+      stateTest "C" false
+      stateTest "CAA" false
+      stateTest "C3" false
+      stateTest "C$" false
+
+    describe "Exercise - nonEmptyRegex" do
+      let
+        nonEmptyTest str exp = it (show str) do
+          test nonEmptyRegex str `shouldEqual` exp
+
+      nonEmptyTest "Houston" true
+      nonEmptyTest "My Street" true
+      nonEmptyTest "Ñóñá" true
+      nonEmptyTest " Start with whitespace" true
+      nonEmptyTest "End with whitespace " true
+      nonEmptyTest "" false
+      nonEmptyTest " " false
+      nonEmptyTest "\t" false
+
+    describe "Exercise - validateAddressImproved" do
+      it "Valid" do
+        let addr = address "22 Fake St" "Fake City" "CA"
+
+        validateAddressImproved addr `shouldEqual` pure addr
+
+      it "Invalid Street" do
+        (validateAddressImproved $ address "" "Fake City" "CA")
+          `shouldEqual`
+            invalid [ "Field 'Street' did not match the required format" ]
+
+      it "Invalid City" do
+        (validateAddressImproved $ address "22 Fake St" "\t" "CA")
+          `shouldEqual`
+            invalid [ "Field 'City' did not match the required format" ]
+
+      it "Invalid State" do
+        (validateAddressImproved $ address "22 Fake St" "Fake City" "C3")
+          `shouldEqual`
+            invalid [ "Field 'State' did not match the required format" ]

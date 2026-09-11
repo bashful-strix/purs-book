@@ -3,6 +3,7 @@ module Test.Cp6.Solutions where
 import Prelude
 
 import Data.Array (nub, nubEq)
+import Data.Foldable (class Foldable, foldMap, foldl, foldr)
 import Data.Generic.Rep (class Generic)
 import Data.Newtype (class Newtype, over2, wrap)
 import Data.Ord.Generic (genericCompare)
@@ -73,5 +74,49 @@ dedupShapes = nubEq
 
 dedupShapesFast :: Array Shape -> Array Shape
 dedupShapesFast = nub
+
+-- }}}
+
+-- ex 3 {{{
+
+data NonEmpty a = NonEmpty a (Array a)
+
+derive instance Generic (NonEmpty a) _
+instance Show a => Show (NonEmpty a) where
+  show = genericShow
+
+-- derive instance Eq a => Eq (NonEmpty a)
+instance Eq a => Eq (NonEmpty a) where
+  eq (NonEmpty a as) (NonEmpty b bs) = a == b && as == bs
+
+instance Semigroup (NonEmpty a) where
+  append (NonEmpty a as) (NonEmpty b bs) = NonEmpty a (as <> [ b ] <> bs)
+
+instance Functor NonEmpty where
+  map f (NonEmpty a as) = NonEmpty (f a) (f <$> as)
+
+instance Foldable NonEmpty where
+  -- foldr f b (NonEmpty a as) = foldr f b ([ a ] <> as)
+  -- foldl f b (NonEmpty a as) = foldl f b ([ a ] <> as)
+  foldr f b (NonEmpty a as) = f a (foldr f b as)
+  foldl f b (NonEmpty a as) = foldl f (f b a) as
+  foldMap f (NonEmpty a as) = f a <> foldMap f as
+
+data Extended a = Infinite | Finite a
+
+derive instance Eq a => Eq (Extended a)
+
+instance Ord a => Ord (Extended a) where
+  compare Infinite Infinite = EQ
+  compare _ Infinite = LT
+  compare Infinite _ = GT
+  compare (Finite a) (Finite b) = compare a b
+
+data OneMore f a = OneMore a (f a)
+
+instance Foldable f => Foldable (OneMore f) where
+  foldr f b (OneMore a as) = f a (foldr f b as)
+  foldl f b (OneMore a as) = foldl f (f b a) as
+  foldMap f (OneMore a as) = f a <> foldMap f as
 
 -- }}}

@@ -198,6 +198,46 @@
             "strings"
           ]
         }
+      },
+      "c10": {
+        "path": "c10",
+        "core": {
+          "dependencies": [
+            "argonaut",
+            "argonaut-generic",
+            "arrays",
+            "bifunctors",
+            "console",
+            "css",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "halogen",
+            "halogen-css",
+            "maybe",
+            "prelude",
+            "strings",
+            "validation",
+            "web-events",
+            "web-uievents"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "aff",
+            "aff-promise",
+            "argonaut-codecs",
+            "console",
+            "control",
+            "effect",
+            "functions",
+            "ordered-collections",
+            "pairs",
+            "spec",
+            "spec-node",
+            "tuples"
+          ]
+        }
       }
     },
     "package_set": {
@@ -880,6 +920,21 @@
         "unsafe-coerce"
       ]
     },
+    "aff-promise": {
+      "type": "registry",
+      "version": "4.0.0",
+      "integrity": "sha256-Jgp3y+NWuuAmwz2V3LlWoX+AvxqfVglY77N5zTw8xnI=",
+      "dependencies": [
+        "aff",
+        "control",
+        "effect",
+        "either",
+        "exceptions",
+        "foreign",
+        "prelude",
+        "transformers"
+      ]
+    },
     "ansi": {
       "type": "registry",
       "version": "7.0.0",
@@ -888,6 +943,16 @@
         "foldable-traversable",
         "lists",
         "prelude"
+      ]
+    },
+    "argonaut": {
+      "type": "registry",
+      "version": "9.0.0",
+      "integrity": "sha256-M/EUEihkRu5xKGKe7UfkrybGj56SDTKz1EappEOiWgA=",
+      "dependencies": [
+        "argonaut-codecs",
+        "argonaut-core",
+        "argonaut-traversals"
       ]
     },
     "argonaut-codecs": {
@@ -929,6 +994,46 @@
         "prelude",
         "strings",
         "tailrec"
+      ]
+    },
+    "argonaut-generic": {
+      "type": "registry",
+      "version": "8.0.0",
+      "integrity": "sha256-qUuZpoEip2knLFPT14OnRc1BkZcr3Nyy+GSfqVQGM9c=",
+      "dependencies": [
+        "argonaut-codecs",
+        "argonaut-core",
+        "arrays",
+        "bifunctors",
+        "control",
+        "either",
+        "foreign-object",
+        "partial",
+        "prelude"
+      ]
+    },
+    "argonaut-traversals": {
+      "type": "registry",
+      "version": "10.0.0",
+      "integrity": "sha256-guTCBwDiOECrV9CvHF2cH61wa0xMNkbw2/zgl9c0QVk=",
+      "dependencies": [
+        "argonaut-codecs",
+        "argonaut-core",
+        "arrays",
+        "control",
+        "either",
+        "foldable-traversable",
+        "foreign-object",
+        "gen",
+        "integers",
+        "lists",
+        "maybe",
+        "prelude",
+        "profunctor-lenses",
+        "strings",
+        "tailrec",
+        "tuples",
+        "unfoldable"
       ]
     },
     "arraybuffer-types": {
@@ -1914,6 +2019,17 @@
       "dependencies": [
         "newtype",
         "prelude"
+      ]
+    },
+    "pairs": {
+      "type": "registry",
+      "version": "9.0.1",
+      "integrity": "sha256-5a1aKxFndbl6NWuNcVuar6j2pDyBJAZDtnab0d+98sE=",
+      "dependencies": [
+        "distributive",
+        "foldable-traversable",
+        "prelude",
+        "quickcheck"
       ]
     },
     "parallel": {

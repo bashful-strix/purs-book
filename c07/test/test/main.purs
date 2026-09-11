@@ -2,21 +2,26 @@ module Test.Cp7.Main where
 
 import Prelude
 
+import Control.Monad.Writer (execWriter, tell)
+
+import Data.Array ((..))
 import Data.Either (Either(..))
+import Data.Foldable (foldl, foldr, foldMap)
+import Data.Int (fromNumber)
 import Data.List (List(..), (:))
 import Data.Maybe (Maybe(..))
 import Data.String.Regex (test)
+import Data.Traversable (sequence, traverse)
 import Data.Validation.Semigroup (invalid)
 
 import Effect (Effect)
 
 import Test.Spec (describe, it, parallel, pending)
-import Test.Spec.Assertions (shouldEqual)
+import Test.Spec.Assertions (shouldEqual, shouldNotEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
 
-import Cp7.Data.AddressBook (address)
-
+import Cp7.Data.AddressBook (PhoneType(..), address, phoneNumber)
 import Test.Cp7.Solutions
   ( addMaybe
   , divMaybe
@@ -31,6 +36,13 @@ import Test.Cp7.Solutions
   , stateRegex
   , nonEmptyRegex
   , validateAddressImproved
+
+  , Tree(..)
+  , traversePreOrder
+  , traversePostOrder
+  , validatePersonOptionalAddress
+  , traverseUsingSequence
+  , sequenceUsingTraverse
   )
 
 main :: Effect Unit
@@ -165,3 +177,133 @@ main = runSpecAndExitProcess [ consoleReporter ] $ parallel do
         (validateAddressImproved $ address "22 Fake St" "Fake City" "C3")
           `shouldEqual`
             invalid [ "Field 'State' did not match the required format" ]
+
+  describe "Exercise Group - Traversable Functors" do
+    let
+      tree = Branch (Branch Leaf 1 Leaf) 2 (Branch Leaf 3 Leaf)
+
+      leaf :: forall a. a -> Tree a
+      leaf x = Branch Leaf x Leaf
+
+      intTree =
+        Branch
+          (Branch (leaf 1) 2 (leaf 3))
+          4
+          (Branch (leaf 5) 6 (leaf 7))
+
+    describe "Exercise - Tree Show and Eq" do
+      it "Show" do
+        show tree `shouldEqual`
+          "(Branch (Branch Leaf 1 Leaf) 2 (Branch Leaf 3 Leaf))"
+
+      it "Eq - Equal" do
+        tree `shouldEqual` tree
+
+      it "Eq - Not Equal" do
+        tree `shouldNotEqual` Leaf
+
+    describe "Exercise - traverse" do
+      describe "Functor Tree" do
+        it "Functor - map" do
+          map show intTree `shouldEqual`
+            Branch
+              (Branch (leaf "1") "2" (leaf "3"))
+              "4"
+              (Branch (leaf "5") "6" (leaf "7"))
+
+      describe "Foldable Tree" do
+        it "Foldable - foldr" $
+          foldr (\x acc -> show x <> acc) "" intTree
+            `shouldEqual` "1234567"
+
+        it "Foldable - foldl" $
+          foldl (\acc x -> show x <> acc) "" intTree
+            `shouldEqual` "7654321"
+
+        it "Foldable - foldMap" $
+          foldMap (\x -> show x) intTree `shouldEqual` "1234567"
+
+      describe "Maybe side-effect" do
+        it "Just - traverse" $
+          (traverse fromNumber $ Branch (leaf 1.0) 2.0 (leaf 3.0))
+            `shouldEqual` (Just $ Branch (leaf 1) 2 (leaf 3))
+
+        it "Just - sequence" $
+          (sequence $ Branch (leaf $ Just 1) (Just 2) (leaf $ Just 3))
+            `shouldEqual` (Just $ Branch (leaf 1) 2 (leaf 3))
+
+        it "Nothing - traverse" $
+          (traverse fromNumber $ Branch (leaf 1.0) 2.0 (leaf 3.7))
+            `shouldEqual` Nothing
+
+        it "Nothing - sequence" $
+          (sequence $ Branch (leaf $ Nothing) (Just 2) (leaf $ Just 3))
+            `shouldEqual` Nothing
+
+      it "Array side-effect - check traversal order" $
+        ( execWriter
+            $ traverse (\x -> tell [ x ])
+            $ Branch
+                (Branch (leaf 1) 2 (leaf 3))
+                4
+                (Branch (leaf 5) 6 (leaf 7))
+        ) `shouldEqual` (1 .. 7)
+
+    it "Exercise - traversePreOrder" $
+      ( execWriter
+          $ traversePreOrder (\x -> tell [ x ])
+          $ Branch
+              (Branch (leaf 3) 2 (leaf 4))
+              1
+              (Branch (leaf 6) 5 (leaf 7))
+      ) `shouldEqual` (1 .. 7)
+
+    it "Exercise - traversePostOrder" $
+      ( execWriter
+          $ traversePostOrder (\x -> tell [ x ])
+          $ Branch (Branch (leaf 1) 3 (leaf 2)) 7 (Branch (leaf 4) 6 (leaf 5))
+      ) `shouldEqual` (1 .. 7)
+
+    describe "Exercise - validatePersonOptionalAddress" do
+      let
+        examplePerson =
+          { firstName: "John"
+          , lastName: "Smith"
+          , homeAddress: Just $ address "123 Fake St." "FakeTown" "CA"
+          , phones:
+              [ phoneNumber HomePhone "555-555-5555"
+              , phoneNumber CellPhone "555-555-0000"
+              ]
+          }
+
+      it "Just Address" do
+        validatePersonOptionalAddress examplePerson `shouldEqual`
+          pure examplePerson
+
+      it "Nothing" do
+        let
+          examplePersonNoAddress = examplePerson { homeAddress = Nothing }
+        validatePersonOptionalAddress examplePersonNoAddress
+          `shouldEqual` pure examplePersonNoAddress
+
+      it "Just Address with empty city" do
+        ( validatePersonOptionalAddress $ examplePerson
+            { homeAddress = Just $ address "123 Fake St." "" "CA" }
+        ) `shouldEqual` invalid ([ "Field 'City' cannot be empty" ])
+
+    describe "Exercise - sequenceUsingTraverse" do
+      it "Just" do
+        sequenceUsingTraverse [ Just 1, Just 2 ]
+          `shouldEqual` Just [ 1, 2 ]
+
+      it "Nothing" do
+        sequenceUsingTraverse [ Just 1, Nothing ] `shouldEqual` Nothing
+
+    describe "Exercise - traverseUsingSequence" do
+      it "Just" do
+        traverseUsingSequence fromNumber [ 1.0, 2.0 ]
+          `shouldEqual` Just [ 1, 2 ]
+
+      it "Nothing" do
+        traverseUsingSequence fromNumber [ 1.0, 2.7 ]
+          `shouldEqual` Nothing

@@ -3,14 +3,24 @@ module Test.Cp7.Solutions where
 import Prelude
 
 import Control.Apply (lift2)
+import Data.Foldable (class Foldable, foldMap, foldl, foldr)
+import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
+import Data.Show.Generic (genericShow)
 import Data.String.Regex (Regex)
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
+import Data.Traversable (class Traversable, sequence, traverse)
 import Data.Validation.Semigroup (V)
 
-import Cp7.Data.AddressBook (Address, address)
-import Cp7.Data.AddressBook.Validation (Errors, matches)
+import Cp7.Data.AddressBook (Address, PhoneNumber, address)
+import Cp7.Data.AddressBook.Validation
+  ( Errors
+  , matches
+  , nonEmpty
+  , validateAddress
+  , validatePhoneNumbers
+  )
 
 -- ex 1 {{{
 
@@ -58,5 +68,102 @@ validateAddressImproved a = ado
   city <- matches "City" nonEmptyRegex a.city
   state <- matches "State" stateRegex a.state
   in address street city state
+
+-- }}}
+
+-- ex 3 {{{
+
+data Tree a
+  = Leaf
+  | Branch (Tree a) a (Tree a)
+
+derive instance Eq a => Eq (Tree a)
+derive instance Generic (Tree a) _
+
+instance Show a => Show (Tree a) where
+  show a = genericShow a
+
+instance Functor Tree where
+  map _ Leaf = Leaf
+  map f (Branch l a r) = Branch (map f l) (f a) (map f r)
+
+instance Foldable Tree where
+  foldr f b = case _ of
+    Leaf -> b
+    Branch l a r ->  foldr f (f a (foldr f b r)) l
+  foldl f b = case _ of
+    Leaf -> b
+    Branch l a r -> foldl f (f (foldl f b l) a) r
+  foldMap f = case _ of
+    Leaf -> mempty
+    Branch l a r -> foldMap f l <> f a <> foldMap f r
+
+instance Traversable Tree where
+  traverse f = case _ of
+    Leaf -> pure Leaf
+    Branch l a r -> Branch <$> traverse f l <*> f a <*> traverse f r
+  -- sequence = traverse identity
+  sequence = case _ of
+    Leaf -> pure Leaf
+    Branch l a r -> Branch <$> sequence l <*> a <*> sequence r
+
+traversePreOrder
+  :: ∀ m a b
+   . Applicative m
+  => (a -> m b)
+  -> Tree a
+  -> m (Tree b)
+traversePreOrder _ Leaf = pure Leaf
+traversePreOrder f (Branch l a r) = ado
+  a' <- f a
+  l' <- traversePreOrder f l
+  r' <- traversePreOrder f r
+  in Branch l' a' r'
+
+traversePostOrder
+  :: ∀ m a b
+   . Applicative m
+  => (a -> m b)
+  -> Tree a
+  -> m (Tree b)
+traversePostOrder _ Leaf = pure Leaf
+traversePostOrder f (Branch l a r) = ado
+  l' <- traversePostOrder f l
+  r' <- traversePostOrder f r
+  a' <- f a
+  in Branch l' a' r'
+
+type PersonOptionalAddress =
+  { firstName :: String
+  , lastName :: String
+  , homeAddress :: Maybe Address
+  , phones :: Array PhoneNumber
+  }
+
+validatePersonOptionalAddress
+  :: PersonOptionalAddress -> V Errors PersonOptionalAddress
+validatePersonOptionalAddress p = ado
+  firstName   <- nonEmpty "First Name" p.firstName
+  lastName    <- nonEmpty "Last Name" p.lastName
+  homeAddress <- traverse validateAddress p.homeAddress
+  phones      <- validatePhoneNumbers "Phone Numbers" p.phones
+  in { firstName, lastName, homeAddress, phones }
+
+traverseUsingSequence
+  :: ∀ f m a b
+   . Traversable f
+  => Applicative m
+  => (a -> m b)
+  -> f a
+  -> m (f b)
+traverseUsingSequence fn = sequence <<< map fn
+
+sequenceUsingTraverse
+  :: ∀ f m a
+   . Traversable f
+  => Applicative m
+  => f (m a)
+  -> m (f a)
+sequenceUsingTraverse = traverse identity
 
 -- }}}

@@ -2,10 +2,14 @@ module Test.Cp8.Main where
 
 import Prelude
 
+import Data.Either (fromLeft, fromRight)
 import Data.List (List(..), (:), foldM)
 import Data.Maybe (Maybe(..))
+import Data.Number (abs, pi)
 
 import Effect (Effect)
+import Effect.Exception (error, message, try)
+import Effect.Unsafe (unsafePerformEffect)
 
 import Test.Spec (describe, it)
 import Test.Spec.Assertions (shouldEqual)
@@ -17,6 +21,10 @@ import Test.Cp8.Solutions
   ( third
   , possibleSums
   , filterM
+
+  , exceptionDivide
+  , estimatePi
+  , fibonacci
   )
 
 main :: Effect Unit
@@ -103,3 +111,32 @@ main = runSpecAndExitProcess [ consoleReporter ] do
               onlyPositiveEvenIntegers
               (2 : 3 : 4 : Nil)
           ) `shouldEqual` (Just (2 : 4 : Nil))
+
+    describe "exceptionDivide" do
+      it "6 / 3" $
+        ( fromRight 0
+            $ unsafePerformEffect
+            $ try $ exceptionDivide 6 3
+        ) `shouldEqual` 2
+
+      it "6 / 0" $
+        ( message
+            $ fromLeft (error "")
+            $ unsafePerformEffect
+            $ try $ exceptionDivide 6 0
+        ) `shouldEqual` "div zero"
+
+    describe "ST" do
+      describe "estimatePi" do
+        it "1000 terms of Gregory Series" $
+          (abs (estimatePi 1000 - pi) < 0.002) `shouldEqual` true
+
+        it "1000000 terms of Gregory Series" $
+          (abs (estimatePi 1000000 - pi) < 0.000002) `shouldEqual` true
+
+      describe "fibonacci" do
+        it "40th Fibonacci number" $
+          (fibonacci 40) `shouldEqual` 102334155
+
+        it "45th Fibonacci number" $
+          (fibonacci 45) `shouldEqual` 1134903170

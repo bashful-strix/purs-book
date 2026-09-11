@@ -22,3 +22,13 @@ diagonal :: Number -> Number -> Number
 diagonal a b = sqrt (a * a + b * b)
 
 -- }}}
+
+-- ex 2 {{{
+
+circleArea :: Number -> Number
+circleArea r = pi * r * r
+
+leftoverCents :: Int -> Int
+leftoverCents n = rem n 100
+
+-- }}}

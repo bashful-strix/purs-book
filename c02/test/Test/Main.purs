@@ -13,6 +13,9 @@ import Cp2.Euler
   ( answer
 
   , diagonal
+
+  , circleArea
+  , leftoverCents
   )
 
 main :: Effect Unit
@@ -30,3 +33,20 @@ main = runSpecAndExitProcess [consoleReporter] do
 
     it "5 12 13" do
       diagonal 5.0 12.0 `shouldEqual` 13.0
+
+  describe "circleArea" do
+    it "radius 1" do
+      circleArea 1.0 `shouldEqual` 3.141592653589793
+
+    it "radius 3" do
+      circleArea 3.0 `shouldEqual` 28.274333882308138
+
+  describe "leftoverCents" do
+    it "23" do
+      leftoverCents 23 `shouldEqual` 23
+
+    it "456" do
+      leftoverCents 456 `shouldEqual` 56
+
+    it "-789" do
+      leftoverCents (-789) `shouldEqual` (-89)

@@ -2,10 +2,15 @@ module Test.Cp11.Main where
 
 import Prelude
 
-import Control.Monad.Writer (execWriter)
+import Control.Monad.Except (runExceptT)
+import Control.Monad.State (runStateT)
+import Control.Monad.Writer (execWriter, runWriterT)
 
+import Data.Either (Either(..))
 import Data.Monoid.Additive (Additive(..))
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+
 import Effect (Effect)
 
 import Test.Spec (describe, it)
@@ -23,6 +28,12 @@ import Test.Cp11.Solutions
 
   , sumArrayWriter
   , collatz
+
+  , safeDivide
+  , string
+  , line'
+  , indent'
+  , render'
   )
 
 main :: Effect Unit
@@ -103,3 +114,42 @@ main = runSpecAndExitProcess [ consoleReporter ] do
 
       it "c = 15" do
         collatz 15 `shouldEqual` expected_15
+
+  describe "Exercises Group - Monad Transformers" do
+    describe "safeDivide" do
+      it "should fail when dividing by zero" do
+        (unwrap $ runExceptT $ safeDivide 5 0)
+          `shouldEqual` (Left "Divide by zero!")
+
+      it "should successfully divide for any other input" do
+        (unwrap $ runExceptT $ safeDivide 6 3) `shouldEqual` (Right 2)
+
+    describe "parser" do
+      let
+        runParser p s = unwrap $ runExceptT $ runWriterT $ runStateT p s
+
+      it "should parse a string" do
+        runParser (string "abc") "abcdef" `shouldEqual`
+          (Right (Tuple (Tuple "abc" "def") [ "The state is abcdef" ]))
+
+      it "should fail if string could not be parsed" do
+        runParser (string "abc") "foobar"
+          `shouldEqual` (Left [ "Could not parse" ])
+
+    describe "indents with ReaderT and WriterT" do
+      let
+        expectedText =
+          "Here is some indented text:\n\
+          \  I am indented\n\
+          \  So am I\n\
+          \    I am even more indented"
+
+      it "should render with indentations" do
+        ( render' $ do
+            line' "Here is some indented text:"
+            indent' $ do
+              line' "I am indented"
+              line' "So am I"
+              indent' $ do
+                line' "I am even more indented"
+        ) `shouldEqual` expectedText

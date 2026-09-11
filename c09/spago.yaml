@@ -1,0 +1,32 @@
+package:
+  name: c09
+  dependencies:
+    - console
+    - effect
+    - prelude
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp9.Main
+  test:
+    main: Test.Cp9.Main
+    dependencies:
+      - aff
+      - arrays
+      - bifunctors
+      - console
+      - effect
+      - either
+      - exceptions
+      - fetch
+      - foldable-traversable
+      - maybe
+      - node-buffer
+      - node-fs
+      - node-path
+      - ordered-collections
+      - parallel
+      - prelude
+      - spec
+      - spec-node
+      - strings

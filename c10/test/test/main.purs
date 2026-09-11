@@ -4,7 +4,7 @@ import Prelude
 
 import Data.Argonaut (JsonDecodeError(..))
 import Data.Either (Either(..))
-import Data.Function.Uncurried (runFn2)
+import Data.Function.Uncurried (runFn2, runFn3)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -45,6 +45,11 @@ import Test.Cp10.Examples
   , yell
   )
 import Test.Cp10.URI (_encodeURIComponent)
+
+import Test.Cp10.Solutions
+  ( volumeFn
+  , volumeArrow
+  )
 
 main :: Effect Unit
 main = runSpecAndExitProcess [ consoleReporter ] do
@@ -162,3 +167,18 @@ main = runSpecAndExitProcess [ consoleReporter ] do
                   [ (Tuple "Foo" 42), (Tuple "cat" 2), (Tuple "hat" 1) ]
               )
           )
+
+  describe "Exercise Group - Calling JavaScript" do
+    describe "Exercise - volumeFn" do
+      it "1 2 3" do
+        runFn3 volumeFn 1.0 2.0 3.0 `shouldEqual` 6.0
+
+      it "1 0 3" do
+        runFn3 volumeFn 1.0 0.0 3.0 `shouldEqual` 0.0
+
+    describe "Exercise - volumeArrow" do
+      it "1 2 3" do
+        volumeArrow 1.0 2.0 3.0 `shouldEqual` 6.0
+
+      it "1 0 3" do
+        volumeArrow 1.0 0.0 3.0 `shouldEqual` 0.0

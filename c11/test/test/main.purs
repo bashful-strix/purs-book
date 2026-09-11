@@ -2,21 +2,31 @@ module Test.Cp11.Main where
 
 import Prelude
 
-import Control.Monad.Except (runExceptT)
+import Control.Monad.Except (runExcept, runExceptT)
+import Control.Monad.RWS.Trans (RWSResult(..), runRWST)
 import Control.Monad.State (runStateT)
 import Control.Monad.Writer (execWriter, runWriterT)
 
 import Data.Either (Either(..))
+import Data.List (List, (:))
+import Data.List (List(..), sort) as L
+import Data.Map as M
 import Data.Monoid.Additive (Additive(..))
 import Data.Newtype (unwrap)
+import Data.Set as S
 import Data.Tuple (Tuple(..))
 
 import Effect (Effect)
 
 import Test.Spec (describe, it)
-import Test.Spec.Assertions (shouldEqual)
+import Test.Spec.Assertions (fail, shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
+
+import Cp11.Game (Game, cheat, move, pickUp)
+import Cp11.Data.GameEnvironment(GameEnvironment(..))
+import Cp11.Data.GameItem (GameItem(..))
+import Cp11.Data.GameState (GameState(..), initialGameState)
 
 import Test.Cp11.Solutions
   ( testParens
@@ -196,3 +206,38 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       it "should fail if first is not a or b" do
         runParser asOrBs "foobar"
           `shouldEqual` (Left [ "Could not parse", "Could not parse" ])
+
+  describe "Exercises Group - The RWS Monad" do
+    let
+      runGame
+        :: Game Unit
+        -> Either (List String) (RWSResult GameState Unit (List String))
+      runGame testGame = runExcept $ runRWST testGame env initialGameState
+
+      env = GameEnvironment
+        { debugMode: false, playerName: "Phil" }
+
+      playerHasAllItems (GameState { inventory }) = inventory == S.fromFoldable
+        [ Candle, Matches ]
+
+      mapIsEmpty (GameState { items }) = M.isEmpty items
+
+      expectedLogs =
+        ("You now have the Candle" : "You now have the Matches" : L.Nil)
+
+    describe "adds all items to your inventory when cheating" do
+      let
+        runCheatTest label testGame =
+          it label
+            case runGame testGame of
+              Left _ -> fail "game failed"
+              Right (RWSResult actualState _ log) -> do
+                playerHasAllItems actualState `shouldEqual` true
+                mapIsEmpty actualState `shouldEqual` true
+                L.sort log `shouldEqual` expectedLogs
+
+      runCheatTest "only cheat" cheat
+      runCheatTest "move and cheat" $ move 0 (-1) *> move 0 1 *> cheat
+      runCheatTest "pickup matches and cheat" $ pickUp Matches *> cheat
+      runCheatTest "pickup all, move, and cheat"
+        $ pickUp Matches *> move 0 1 *> pickUp Candle *> cheat

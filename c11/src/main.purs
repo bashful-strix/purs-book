@@ -2,7 +2,8 @@ module Cp11.Main where
 
 import Prelude
 
-import Control.Monad.RWS (RWSResult(..), runRWS)
+import Control.Monad.RWS (RWSResult(..), runRWST)
+import Control.Monad.Except (runExcept)
 
 import Data.Foldable (fold, for_)
 import Data.Newtype (wrap)
@@ -28,10 +29,16 @@ runGame env = do
   let
     lineHandler :: GameState -> String -> Effect Unit
     lineHandler currentState input = do
-      next <- case runRWS (game (split (wrap " ") input)) env currentState of
-        RWSResult state _ written -> do
-          for_ written log
-          pure state
+      next <-
+        case
+          runExcept $ runRWST (game (split (wrap " ") input)) env currentState
+          of
+          Left errs -> do
+            for_ errs (log <<< ("Err: " <> _))
+            pure currentState
+          Right (RWSResult state _ written) -> do
+            for_ written log
+            pure state
 
       RL.prompt interface
       RL.question "" (lineHandler next) interface
@@ -40,7 +47,7 @@ runGame env = do
   RL.question "" (lineHandler initialGameState) interface
 
 main :: Effect Unit
-main = OP.customExecParser prefs argParser >>= runGame 
+main = OP.customExecParser prefs argParser >>= runGame
   where
 
   argParser :: OP.ParserInfo GameEnvironment
@@ -50,7 +57,7 @@ main = OP.customExecParser prefs argParser >>= runGame
   env = gameEnvironment <$> player <*> debug
 
   player :: OP.Parser String
-  player = OP.strOption $ fold 
+  player = OP.strOption $ fold
     [ OP.long "player"
     , OP.short 'p'
     , OP.metavar "<player name>"
@@ -58,15 +65,16 @@ main = OP.customExecParser prefs argParser >>= runGame
     ]
 
   debug :: OP.Parser Boolean
-  debug = OP.switch $ fold 
+  debug = OP.switch $ fold
     [ OP.long "debug"
     , OP.short 'd'
     , OP.help "Use debug mode"
     ]
 
   prefs = OP.prefs OP.showHelpOnEmpty
-  parserOptions = fold 
+
+  parserOptions = fold
     [ OP.fullDesc
     , OP.progDesc "Play the game as <player name>"
-    , OP.header "Monadic Adventures! A game to learn monad transformers" 
+    , OP.header "Monadic Adventures! A game to learn monad transformers"
     ]

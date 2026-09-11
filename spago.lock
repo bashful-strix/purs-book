@@ -2142,6 +2142,14 @@
         "tuples"
       ]
     },
+    "point-free": {
+      "type": "registry",
+      "version": "1.0.0",
+      "integrity": "sha256-GjTsIDTdhcS0sCe+eis9j58LFu0IVRmyV+yWvjwgILQ=",
+      "dependencies": [
+        "prelude"
+      ]
+    },
     "posix-types": {
       "type": "registry",
       "version": "6.0.0",

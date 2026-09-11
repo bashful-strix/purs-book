@@ -238,6 +238,37 @@
             "tuples"
           ]
         }
+      },
+      "c11": {
+        "path": "c11",
+        "core": {
+          "dependencies": [
+            "console",
+            "control",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "identity",
+            "lists",
+            "maybe",
+            "newtype",
+            "node-readline",
+            "optparse",
+            "ordered-collections",
+            "prelude",
+            "strings",
+            "transformers",
+            "tuples"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "arrays",
+            "point-free",
+            "spec",
+            "spec-node"
+          ]
+        }
       }
     },
     "package_set": {
@@ -1877,6 +1908,26 @@
         "strings"
       ]
     },
+    "node-readline": {
+      "type": "registry",
+      "version": "8.1.1",
+      "integrity": "sha256-Gw+BTk2h2RguaD/nEl9VUNSRcOUE4mf0XI+0rzzdYug=",
+      "dependencies": [
+        "aff",
+        "datetime",
+        "effect",
+        "either",
+        "exceptions",
+        "foreign",
+        "node-event-emitter",
+        "node-process",
+        "node-streams",
+        "options",
+        "prelude",
+        "refs",
+        "unsafe-coerce"
+      ]
+    },
     "node-streams": {
       "type": "registry",
       "version": "9.0.1",
@@ -1954,6 +2005,20 @@
         "partial",
         "prelude",
         "strings",
+        "tuples"
+      ]
+    },
+    "options": {
+      "type": "registry",
+      "version": "7.0.0",
+      "integrity": "sha256-q/E8Hvdn1crgoyBQeZ/b83vVprlFBSIwtb6twt3KQJU=",
+      "dependencies": [
+        "contravariant",
+        "foreign",
+        "foreign-object",
+        "maybe",
+        "newtype",
+        "prelude",
         "tuples"
       ]
     },

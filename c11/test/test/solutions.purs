@@ -3,6 +3,7 @@ module Test.Cp11.Solutions where
 import Prelude
 import PointFree ((~$))
 
+import Control.Alt ((<|>))
 import Control.Monad.Except.Trans (ExceptT, throwError)
 import Control.Monad.Reader (Reader, runReader)
 import Control.Monad.Reader.Trans (ReaderT, ask, local, runReaderT)
@@ -10,6 +11,8 @@ import Control.Monad.State (execState, get, modify, put)
 import Control.Monad.Writer (Writer, runWriter)
 import Control.Monad.Writer.Trans (WriterT, execWriterT, tell)
 
+import Data.Array (some)
+import Data.Foldable (fold)
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Monoid (power)
@@ -117,5 +120,19 @@ cat' =
 render' :: Doc' -> String
 render' =
   joinWith "\n" <<< unwrap <<< execWriterT <<< (runReaderT ~$ 0)
+
+-- }}}
+
+-- ex 5 {{{
+
+asFollowedByBs :: Parser String
+asFollowedByBs = do
+  as <- some (string "a")
+  bs <- some (string "b")
+  pure $ fold $ as <> bs
+
+asOrBs :: Parser String
+asOrBs =
+  fold <$> some (string "a" <|> string "b")
 
 -- }}}

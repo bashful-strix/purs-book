@@ -34,6 +34,9 @@ import Test.Cp11.Solutions
   , line'
   , indent'
   , render'
+
+  , asFollowedByBs
+  , asOrBs
   )
 
 main :: Effect Unit
@@ -153,3 +156,43 @@ main = runSpecAndExitProcess [ consoleReporter ] do
               indent' $ do
                 line' "I am even more indented"
         ) `shouldEqual` expectedText
+
+  describe "Exercises Group - Monad Comprehensions/backtracking" do
+    describe "parser" do
+      let
+        runParser p s = unwrap $ runExceptT $ runWriterT $ runStateT p s
+
+      it "should parse as followed by bs" do
+        runParser asFollowedByBs "aaabbcde" `shouldEqual`
+          ( Right
+              ( Tuple (Tuple "aaabb" "cde")
+                  [ "The state is aaabbcde"
+                  , "The state is aabbcde"
+                  , "The state is abbcde"
+                  , "The state is bbcde"
+                  , "The state is bcde"
+                  ]
+              )
+          )
+
+      it "should fail if first is not a" do
+        runParser asFollowedByBs "bfoobar"
+          `shouldEqual` (Left [ "Could not parse" ])
+
+      it "should parse as and bs" do
+        runParser asOrBs "babbaacde" `shouldEqual`
+          ( Right
+              ( Tuple (Tuple "babbaa" "cde")
+                  [ "The state is babbaacde"
+                  , "The state is abbaacde"
+                  , "The state is bbaacde"
+                  , "The state is baacde"
+                  , "The state is aacde"
+                  , "The state is acde"
+                  ]
+              )
+          )
+
+      it "should fail if first is not a or b" do
+        runParser asOrBs "foobar"
+          `shouldEqual` (Left [ "Could not parse", "Could not parse" ])

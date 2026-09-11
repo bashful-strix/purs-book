@@ -2,7 +2,7 @@ module Test.Cp6.Solutions where
 
 import Prelude
 
-import Data.Array (nub, nubEq)
+import Data.Array (length, nub, nubByEq, nubEq)
 import Data.Foldable (class Foldable, foldMap, foldl, foldr, maximum)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (fromJust)
@@ -10,6 +10,8 @@ import Data.Monoid (power)
 import Data.Newtype (class Newtype, over2, wrap)
 import Data.Ord.Generic (genericCompare)
 import Data.Show.Generic (genericShow)
+
+import Cp6.Data.Hashable (class Hashable, hash, hashEqual)
 
 -- ex 1 {{{
 
@@ -168,5 +170,21 @@ derive newtype instance Eq m => Eq (Self m)
 
 instance Monoid m => Action m (Self m) where
   act a (Self b) = Self (a <> b)
+
+-- }}}
+
+-- ex 5 {{{
+
+arrayHasDuplicates :: ∀ a. Hashable a => Array a -> Boolean
+arrayHasDuplicates xs =
+  length xs /= length (nubByEq (hashEqual && eq) xs)
+
+newtype Hour = Hour Int
+
+instance Eq Hour where
+  eq (Hour a) (Hour b) = mod a 12 == mod b 12
+
+instance Hashable Hour where
+  hash (Hour a) = hash $ mod a 12
 
 -- }}}

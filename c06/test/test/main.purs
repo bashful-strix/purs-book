@@ -14,6 +14,8 @@ import Test.Spec.Assertions (shouldContain, shouldEqual, shouldNotEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
 
+import Cp6.Data.Hashable (hash)
+
 import Test.Cp6.Solutions
   ( Point(..)
 
@@ -30,6 +32,9 @@ import Test.Cp6.Solutions
   , act
   , Multiply(..)
   , Self(..)
+
+  , arrayHasDuplicates
+  , Hour(..)
   )
 
 main :: Effect Unit
@@ -251,3 +256,21 @@ main = runSpecAndExitProcess [ consoleReporter ] $ parallel do
 
       it "concrete" do
         act m2 a `shouldEqual` (Self (Multiply 12))
+
+  describe "A Type Class for Hashes" do
+    describe "arrayHasDuplicates" do
+      it "no dupe" do
+        arrayHasDuplicates [ 1, 2, 3 ] `shouldEqual` false
+
+      it "dupe" do
+        arrayHasDuplicates [ 1, 1, 3 ] `shouldEqual` true
+
+      it "only hash dupe" do
+        arrayHasDuplicates [ 65536, 1, 2, 3 ] `shouldEqual` false
+
+    describe "Hashable Hour" do
+      it "match" do
+        (hash $ Hour 13) `shouldEqual` (hash $ Hour 1)
+
+      it "mismatch" do
+        (hash $ Hour 14) `shouldNotEqual` (hash $ Hour 1)

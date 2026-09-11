@@ -28,6 +28,10 @@ import Cp5.ChapterExamples
   , lengthTailRec
   )
 
+import Test.Cp5.Solutions
+  ( isEven
+  , countEven
+  )
 main :: Effect Unit
 main = runSpecAndExitProcess [ consoleReporter ] do
   describe "Chapter Examples" do
@@ -69,6 +73,41 @@ main = runSpecAndExitProcess [ consoleReporter ] do
     it "allFiles'" do
       (filename <$> allFiles' root) `shouldEqual` allFileAndDirectoryNames
 
+  describe "Exercise Group - Recursion" do
+    describe "Exercise - isEven" do
+      it "0 is even" do
+        isEven 0 `shouldEqual` true
+
+      it "1 is odd" do
+        isEven 1 `shouldEqual` false
+
+      it "20 is even" do
+        isEven 20 `shouldEqual` true
+
+      it "19 is odd" do
+        isEven 19 `shouldEqual` false
+
+      it "-1 is odd" do
+        isEven (-1) `shouldEqual` false
+
+      it "-20 is even" do
+        isEven (-20) `shouldEqual` true
+
+      it "-19 is odd" do
+        isEven (-19) `shouldEqual` false
+
+    describe "Exercise - countEven" do
+      it "[] has none" do
+        countEven [] `shouldEqual` 0
+
+      it "[0] has 1" do
+        countEven [ 0 ] `shouldEqual` 1
+
+      it "[1] has 0" do
+        countEven [ 1 ] `shouldEqual` 0
+
+      it "[0, 1, 19, 20] has 2" do
+        countEven [ 0, 1, 19, 20 ] `shouldEqual` 2
 allFileAndDirectoryNames :: Array (String)
 allFileAndDirectoryNames =
   [ "/"

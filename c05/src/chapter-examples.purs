@@ -1,6 +1,7 @@
 module Cp5.ChapterExamples where
 
 import Prelude
+
 import Control.Alternative (guard)
 import Data.Array (concatMap, filter, tail, (..), (:))
 import Data.Foldable (product)

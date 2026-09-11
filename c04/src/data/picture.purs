@@ -2,15 +2,18 @@ module Cp4.Data.Picture where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Filterable (filterMap)
 import Data.Foldable (foldl)
-import Data.Number (infinity)
+import Data.Maybe (Maybe(..))
+import Data.Number (infinity, pi)
+import Data.String (joinWith)
 
 data Shape
   = Circle Point Number
   | Rectangle Point Number Number
   | Line Point Point
   | Text Point String
+  | Clipped Picture Point Number Number
 
 {-
 type Shape
@@ -40,6 +43,7 @@ getCentre = case _ of
   Rectangle c _ _ -> c
   Line a b -> (a + b) * { x: 0.5, y: 0.5 }
   Text l _ -> l
+  Clipped _ c _ _ -> c
 
 exampleLine :: Shape
 exampleLine = Line p1 p2
@@ -60,6 +64,13 @@ showShape (Line a b) =
   "Line [start: " <> showPoint a <> ", end: " <> showPoint b <> "]"
 showShape (Text l t) =
   "Text [location: " <> showPoint l <> ", text: " <> show t <> "]"
+showShape (Clipped p c w h) =
+  "Clipped "
+    <> ("[ picture: " <> (show $ showShape <$> p))
+    <> (", centre: " <> showPoint c)
+    <> (", width: " <> show w)
+    <> (", height: " <> show h)
+    <> "]"
 
 showPoint :: Point -> String
 showPoint { x, y } =
@@ -81,9 +92,14 @@ doubleScaleAndCentre = case _ of
     c = getCentre l
     a' = (a - c) * double
     b' = (b - c) * double
+  Clipped p _ w h ->
+    Clipped (doubleScaleAndCentre <$> p) origin (w * 2.0) (h * 2.0)
 
 shapeText :: Shape -> Maybe String
 shapeText (Text _ t) = Just t
+shapeText (Clipped p _ _ _) = case filterMap shapeText p of
+  [] -> Nothing
+  ts -> Just $ joinWith ", " ts
 shapeText _ = Nothing
 
 -- }}}
@@ -162,9 +178,22 @@ shapeBounds = case _ of
     , bottom: y
     , right: x
     }
+  Clipped _ c w h ->
+    shapeBounds $ Rectangle c w h
 
 bounds :: Picture -> Bounds
 bounds = foldl combine emptyBounds
   where
   combine :: Bounds -> Shape -> Bounds
   combine b shape = union (shapeBounds shape) b
+
+-- ex 5 {{{
+
+area :: Shape -> Number
+area = case _ of
+  Circle _ r -> pi * r * r
+  Rectangle _ w h -> w * h
+  Clipped _ _ w h -> w * h
+  _ -> 0.0
+
+-- }}}

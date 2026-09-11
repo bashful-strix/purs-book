@@ -3,10 +3,12 @@ package:
   dependencies:
     - console
     - effect
+    - filterable
     - foldable-traversable
     - maybe
     - numbers
     - prelude
+    - strings
   build:
     pedanticPackages: true
   run:

@@ -2,6 +2,7 @@ module Test.Cp4.Main where
 
 import Prelude
 
+import Data.Int (round)
 import Data.Maybe (Maybe(..))
 
 import Effect (Effect)
@@ -28,12 +29,15 @@ import Cp4.Data.Person (Person)
 import Cp4.Data.Picture
   ( Picture
   , Shape(..)
-  , origin
   , getCentre
+  , origin
 
   , circleAtOrigin
   , doubleScaleAndCentre
   , shapeText
+
+  , area
+  , shapeBounds
   )
 
 john :: Person
@@ -133,7 +137,33 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       shapeText (Circle origin 1.0) `shouldEqual` Nothing
       shapeText (Rectangle origin 1.0 1.0) `shouldEqual` Nothing
       shapeText (Line origin { x: 1.0, y: 1.0 }) `shouldEqual` Nothing
+      shapeText
+        ( Clipped
+            [ Text origin "a"
+            , Circle origin 1.0
+            , Text origin "b"
+            ]
+            origin
+            1.0
+            1.0
+        ) `shouldEqual` Just "a, b"
+
   describe "Exercise Group - Newtype" do
     it "Exercise - calculateWattage" do
       let (Watt w) = calculateWattage (Amp 0.5) (Volt 120.0)
       w `shouldEqual` 60.0
+
+  describe "Exercise Group - Vector Graphics" do
+    it "Exercise - area" do
+      (round $ area $ Circle origin 4.0) `shouldEqual` 50
+      (round $ area $ Rectangle origin 4.0 10.0) `shouldEqual` 40
+      (round $ area $ Line origin { x: 2.0, y: 2.0 }) `shouldEqual` 0
+      (round $ area $ Text origin "Text has no area!") `shouldEqual` 0
+
+    it "Exercise - Clipped shapeBounds" do
+      shapeBounds (Clipped samplePicture { x: 0.0, y: 0.0 } 4.0 4.0)
+        `shouldEqual` { top: 2.0, left: -2.0, right: 2.0, bottom: -2.0 }
+      shapeBounds (Clipped samplePicture { x: 5.0, y: 5.0 } 4.0 4.0)
+        `shouldEqual` { top: 7.0, left: 3.0, right: 7.0, bottom: 3.0 }
+      shapeBounds (Clipped samplePicture { x: 5.0, y: 5.0 } 6.0 6.0)
+        `shouldEqual` { top: 8.0, left: 2.0, right: 8.0, bottom: 2.0 }

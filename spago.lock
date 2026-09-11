@@ -47,10 +47,12 @@
           "dependencies": [
             "console",
             "effect",
+            "filterable",
             "foldable-traversable",
             "maybe",
             "numbers",
-            "prelude"
+            "prelude",
+            "strings"
           ]
         },
         "test": {
@@ -998,6 +1000,25 @@
         "enums",
         "maybe",
         "prelude"
+      ]
+    },
+    "filterable": {
+      "type": "registry",
+      "version": "5.0.0",
+      "integrity": "sha256-be7ci1Bzwud2waqoCtNGsTBZbt7fi+gCLvGddQQRJ3A=",
+      "dependencies": [
+        "arrays",
+        "control",
+        "either",
+        "foldable-traversable",
+        "identity",
+        "lists",
+        "maybe",
+        "newtype",
+        "ordered-collections",
+        "prelude",
+        "st",
+        "tuples"
       ]
     },
     "foldable-traversable": {

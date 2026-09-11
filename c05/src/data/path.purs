@@ -1,5 +1,6 @@
 module Cp5.Data.Path
   ( Path(..)
+  , Size(..)
   , root
   , ls
   , filename
@@ -11,6 +12,8 @@ import Prelude
 
 import Data.Function (on)
 import Data.Maybe (Maybe(..))
+
+import Safe.Coerce (coerce)
 
 data Path
   = Directory String (Array Path)
@@ -24,6 +27,14 @@ instance Ord Path where
 
 instance Show Path where
   show = filename
+
+newtype Size = Size Path
+
+derive newtype instance Eq Size
+
+instance Ord Size where
+  compare = compare `on` (size <<< coerce)
+
 
 root :: Path
 root =

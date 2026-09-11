@@ -73,7 +73,8 @@
             "effect",
             "foldable-traversable",
             "maybe",
-            "prelude"
+            "prelude",
+            "safe-coerce"
           ]
         },
         "test": {

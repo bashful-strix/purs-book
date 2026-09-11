@@ -3,13 +3,14 @@ module Test.Cp5.Main where
 import Prelude
 
 import Data.Array ((..), sort)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
+import Data.Profunctor.Strong ((***))
 import Data.Traversable (sequence_)
 import Data.Tuple.Nested ((/\))
 
 import Effect (Effect)
 
-import Cp5.Data.Path (filename, root)
+import Cp5.Data.Path (Path(..), filename, root)
 
 import Test.Spec (describe, it)
 import Test.Spec.Assertions (shouldEqual)
@@ -46,6 +47,12 @@ import Test.Cp5.Solutions
   , allTrue
   , fibTailRec
   , reverse
+
+  , onlyFiles
+  , whereIs
+  , largestSmallest
+  , largestSmallest'
+  , largestSmallest''
   )
 
 fn :: Maybe Int -> Maybe Int -> Maybe Int
@@ -276,6 +283,78 @@ main = runSpecAndExitProcess [ consoleReporter ] do
 
       it "More than 1 element" do
         reverse [ 1, 2, 3 ] `shouldEqual` [ 3, 2, 1 ]
+
+  describe "Exercise Group - Filesystem" do
+    it "Exercise - onlyFiles" do
+      (map filename $ onlyFiles root) `shouldEqual`
+        [ "/bin/cp"
+        , "/bin/ls"
+        , "/bin/mv"
+        , "/etc/hosts"
+        , "/home/user/todo.txt"
+        , "/home/user/code/js/test.js"
+        , "/home/user/code/haskell/test.hs"
+        ]
+
+    describe "Exercise - whereIs" do
+      it "locates a file"
+        $ (map filename $ whereIs root "ls") `shouldEqual`
+            (Just ("/bin/"))
+
+      it "doesn't locate a file"
+        $ (map filename $ whereIs root "cat") `shouldEqual`
+            Nothing
+
+    describe "Exercise - largestSmallest" do
+      let
+        testls :: String -> Array String -> Path -> _
+        testls label expected path =
+          it label do
+            -- Sorting to allow any ordering
+            (sort $ map filename $ largestSmallest path)
+              `shouldEqual` expected
+        oneFileDir = Directory "/etc/" [ File "/etc/hosts" 300 ]
+        emptyDir = Directory "/etc/" []
+
+      testls "works for root" [ "/etc/hosts", "/home/user/code/js/test.js" ]
+        root
+      testls "works for a directory with one file" [ "/etc/hosts" ] oneFileDir
+      testls "works for an empty directory" [] emptyDir
+
+    describe "Exercise - largestSmallest'" do
+      let
+        testls label expected path =
+          it label do
+            (map (filename *** filename) $ largestSmallest' path)
+              `shouldEqual` expected
+        oneFileDir = Directory "/etc/" [ File "/etc/hosts" 300 ]
+        emptyDir = Directory "/etc/" []
+
+      testls "works for root"
+        (Just $ "/home/user/code/js/test.js" /\ "/etc/hosts")
+        root
+      testls "works for a directory with one file"
+        (Just $ "/etc/hosts" /\ "/etc/hosts")
+        oneFileDir
+      testls "works for an empty directory" Nothing emptyDir
+
+    describe "Exercise - largestSmallest''" do
+      let
+        testls label expected path =
+          it label do
+            (map (filename *** filename) $ largestSmallest'' path)
+              `shouldEqual` expected
+        oneFileDir = Directory "/etc/" [ File "/etc/hosts" 300 ]
+        emptyDir = Directory "/etc/" []
+
+      testls "works for root"
+        (Just $ "/home/user/code/js/test.js" /\ "/etc/hosts")
+        root
+      testls "works for a directory with one file"
+        (Just $ "/etc/hosts" /\ "/etc/hosts")
+        oneFileDir
+      testls "works for an empty directory" Nothing emptyDir
+
 allFileAndDirectoryNames :: Array (String)
 allFileAndDirectoryNames =
   [ "/"

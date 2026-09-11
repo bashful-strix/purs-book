@@ -8,6 +8,7 @@ package:
     - foldable-traversable
     - maybe
     - prelude
+    - safe-coerce
   build:
     pedanticPackages: true
   run:

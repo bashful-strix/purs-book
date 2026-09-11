@@ -3,11 +3,19 @@ module Test.Cp5.Solutions where
 import Prelude
 
 import Control.Alternative (guard)
-import Data.Array ((:), (..), filter, foldl, length, uncons)
-import Data.Maybe (Maybe(..))
+import Data.Array ((:), (..), filter, head, nubByEq, uncons)
+import Data.Foldable (foldMap, foldl,  maximumBy, minimumBy)
+import Data.Function (on)
+import Data.Maybe (Maybe(..), maybe)
+import Data.Ord.Max (Max(..))
+import Data.Ord.Min (Min(..))
+import Data.Profunctor.Strong ((&&&))
 import Data.Tuple.Nested (type (/\), (/\))
 
-import Cp5.ChapterExamples (factors)
+import Safe.Coerce (coerce)
+
+import Cp5.ChapterExamples (factors, length)
+import Cp5.Data.Path (Path, Size(..), filename, isDirectory, ls, size)
 
 -- ex 1 {{{
 
@@ -92,5 +100,42 @@ reverse :: ∀ a. Array a -> Array a
 reverse = foldl (flip (:)) []
 
 -- reverse = foldl (\rev a -> a : rev) []
+
+-- }}}
+
+-- ex 5 {{{
+
+onlyFiles :: Path -> Array Path
+onlyFiles file
+  | isDirectory file = ls file >>= onlyFiles
+  -- | isDirectory file = foldMap onlyFiles (ls file)
+  | otherwise = [ file ]
+
+whereIs :: Path -> String -> Maybe Path
+whereIs path name = head $ go path
+  where
+  go file = do
+    child <- ls file
+    if filename child == filename file <> name then [ file ]
+    else go child
+
+largestSmallest :: Path -> Array Path
+largestSmallest path =
+  nubByEq (eq `on` filename)
+    $ compareWith maximumBy <> compareWith minimumBy
+  where
+  files = onlyFiles path
+  compareWith fn = maybe [] pure $ fn (compare `on` size) files
+
+largestSmallest' :: Path -> Maybe (Path /\ Path)
+largestSmallest' path =
+  (/\) <$> compareWith maximumBy <*> compareWith minimumBy
+  where
+  files = onlyFiles path
+  compareWith fn = fn (compare `on` size) files
+
+largestSmallest'' :: Path -> Maybe (Path /\ Path)
+largestSmallest'' =
+  onlyFiles >>> foldMap (Just <<< (Max &&& Min) <<< Size) >>> coerce
 
 -- }}}

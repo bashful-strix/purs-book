@@ -44,3 +44,25 @@ export const toMaybeIml = just => nothing => a =>
   a === undefined ? nothing : just(a);
 
 // }}}
+
+// ex 4 }}}
+
+export const valuesOfMapImpl = a =>
+  Array.from(new Map(a).values());
+
+export const quadraticRootsJsonImpl = ({ a, b, c }) => {
+  const radicand = b * b - 4 * a * c;
+  if (radicand >= 0) {
+    const rt = Math.sqrt(radicand);
+    return [ { real: (-b + rt) / (2 * a), imag: 0 }
+           , { real: (-b - rt) / (2 * a), imag: 0 }
+           ];
+  } else {
+    const rt = Math.sqrt(-radicand);
+    return [ { real: -b / (2 * a), imag: rt / (2 * a) }
+           , { real: -b / (2 * a), imag: -rt / (2 * a) }
+           ];
+  }
+};
+
+// }}}

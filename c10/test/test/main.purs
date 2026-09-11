@@ -2,12 +2,13 @@ module Test.Cp10.Main where
 
 import Prelude
 
-import Data.Argonaut (JsonDecodeError(..))
-import Data.Either (Either(..))
+import Data.Argonaut (JsonDecodeError(..), decodeJson, encodeJson)
+import Data.Either (Either(..), isLeft)
 import Data.Function.Uncurried (runFn2, runFn3)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Pair (Pair(..))
+import Data.Set as Set
 import Data.Tuple (Tuple(..))
 
 import Effect (Effect)
@@ -58,6 +59,14 @@ import Test.Cp10.Solutions
 
   , quadraticRoots
   , toMaybe
+
+  , valuesOfMap
+  , valuesOfMapGeneric
+  , quadraticRootsSet
+  , quadraticRootsSafe
+  , parseAndDecodeArray2D
+  , Tree(..)
+  , IntOrString(..)
   )
 
 main :: Effect Unit
@@ -240,6 +249,131 @@ main = runSpecAndExitProcess [ consoleReporter ] do
 
       it "Just" do
         (toMaybe $ undefinedHead [1]) `shouldEqual` (Just 1)
+
+  describe "Exercise Group - JSON" do
+    describe "Exercise - valuesOfMap" do
+      it "Items" do
+        (valuesOfMap $ Map.fromFoldable [ Tuple "hat" 1, Tuple "cat" 2 ])
+          `shouldEqual` (Right $ Set.fromFoldable [ 1, 2 ])
+
+      it "Empty" do
+        (valuesOfMap $ Map.fromFoldable [])
+          `shouldEqual` (Right $ Set.fromFoldable [])
+
+    describe "Exercise - valuesOfMapGeneric" do
+      it "String Int" do
+        (valuesOfMapGeneric $ Map.fromFoldable [ Tuple "hat" 1, Tuple "cat" 2 ])
+          `shouldEqual` (Right $ Set.fromFoldable [ 1, 2 ])
+
+      it "(Array Int) String" do
+        ( valuesOfMapGeneric
+          $ Map.fromFoldable [ Tuple [ 1, 3, 5 ] "hat", Tuple [ 43, 8 ] "cat" ]
+        ) `shouldEqual` (Right $ Set.fromFoldable [ "hat", "cat" ])
+
+    describe "Exercise - quadraticRootsSet" do
+      let
+        helper testName poly r1 r2 =
+          it testName do
+            quadraticRootsSet poly
+              `shouldEqual` (Right $ Set.fromFoldable [ r1, r2 ])
+
+      helper "Real"
+        { a: 1.0, b: 2.0, c: -3.0 }
+        { real: 1.0, imag: 0.0 }
+        { real: -3.0, imag: 0.0 }
+
+      helper "Imaginary"
+        { a: 4.0, b: 0.0, c: 16.0 }
+        { real: 0.0, imag: 2.0 }
+        { real: 0.0, imag: -2.0 }
+
+      helper "Complex"
+        { a: 2.0, b: 2.0, c: 5.0 }
+        { real: -0.5, imag: 1.5 }
+        { real: -0.5, imag: -1.5 }
+
+      helper "Repeated"
+        { a: 3.0, b: -6.0, c: 3.0 }
+        { real: 1.0, imag: 0.0 }
+        { real: 1.0, imag: 0.0 }
+
+    describe "Exercise - quadraticRootsSafe" do
+      let
+        helper testName poly r1 r2 =
+          it testName do
+            (map orderCpx $ quadraticRootsSafe poly)
+              `shouldEqual` (Right $ orderCpx $ Pair r1 r2)
+
+      helper "Real"
+        { a: 1.0, b: 2.0, c: -3.0 }
+        { real: 1.0, imag: 0.0 }
+        { real: -3.0, imag: 0.0 }
+
+      helper "Imaginary"
+        { a: 4.0, b: 0.0, c: 16.0 }
+        { real: 0.0, imag: 2.0 }
+        { real: 0.0, imag: -2.0 }
+
+      helper "Complex"
+        { a: 2.0, b: 2.0, c: 5.0 }
+        { real: -0.5, imag: 1.5 }
+        { real: -0.5, imag: -1.5 }
+
+      helper "Repeated"
+        { a: 3.0, b: -6.0, c: 3.0 }
+        { real: 1.0, imag: 0.0 }
+        { real: 1.0, imag: 0.0 }
+
+    it "Exercise - parseAndDecodeArray2D" do
+      let
+        arr = [ [ 1, 2, 3 ], [ 4, 5 ], [ 6 ] ]
+      -- the correct JSON string happens to also be produced by show
+      (parseAndDecodeArray2D $ show arr) `shouldEqual` (Right arr)
+
+    it "Exercise - encode decode Tree" do
+      let
+        tree = Branch (Leaf 1) (Branch (Leaf 2) (Leaf 3))
+      (decodeJson $ encodeJson tree) `shouldEqual` (Right tree)
+
+    describe "Exercise - IntOrString" do
+      it "IoS to IoS Int" do
+        let
+          ios = IntOrString_Int 1
+        (decodeJson $ encodeJson ios) `shouldEqual` (Right ios)
+
+      it "IoS to IoS String" do
+        let
+          ios = IntOrString_String "one"
+        (decodeJson $ encodeJson ios) `shouldEqual` (Right ios)
+
+      it "Int to IoS" do
+        let
+          int = 1
+        (decodeJson $ encodeJson int)
+          `shouldEqual` (Right $ IntOrString_Int int)
+
+      it "String to IoS" do
+        let
+          str = "one"
+        (decodeJson $ encodeJson str)
+          `shouldEqual` (Right $ IntOrString_String str)
+
+      it "IoS to Int" do
+        let
+          int = 1
+        (decodeJson $ encodeJson $ IntOrString_Int int)
+          `shouldEqual` (Right int)
+
+      it "IoS to String" do
+        let
+          str = "one"
+        (decodeJson $ encodeJson $ IntOrString_String str)
+          `shouldEqual` (Right str)
+
+      it "Neither, a Number instead" do
+        let
+          (decoded :: Either _ IntOrString) = decodeJson $ encodeJson 1.5
+        isLeft decoded `shouldEqual` true
 
 -- Put in ascending order by real, then imag components
 orderCpx :: Pair Complex -> Pair Complex

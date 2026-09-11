@@ -2,9 +2,12 @@ module Test.Cp3.Main where
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
+
 import Effect (Effect)
 
-import Test.Spec (pending)
+import Test.Spec (describe, it)
+import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
 
@@ -13,6 +16,10 @@ import Cp3.Data.AddressBook
   , Entry
   , emptyBook
   , insertEntry
+
+  , findEntryByStreet
+  , isInBook
+  , removeDuplicates
   )
 
 john :: Entry
@@ -62,4 +69,20 @@ bookWithDuplicate =
 
 main :: Effect Unit
 main = runSpecAndExitProcess [ consoleReporter ] do
-  pending "tests"
+  describe "Exercise - findEntryByStreet" do
+    it "Lookup existing" do
+      (findEntryByStreet john.address.street book) `shouldEqual` (Just john)
+
+    it "Lookup missing" do
+      (findEntryByStreet "456 Nothing St." book) `shouldEqual` Nothing
+
+  describe "Exercise - isInBook" do
+    it "Check existing" do
+      (isInBook ned.firstName ned.lastName book) `shouldEqual` true
+
+    it "Check missing" do
+      (isInBook "unknown" "person" book) `shouldEqual` false
+
+  describe "Exercise - removeDuplicates" do
+    it "Check duplicates" do
+      (removeDuplicates bookWithDuplicate) `shouldEqual` book

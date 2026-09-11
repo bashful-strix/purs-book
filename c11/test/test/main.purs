@@ -2,6 +2,10 @@ module Test.Cp11.Main where
 
 import Prelude
 
+import Control.Monad.Writer (execWriter)
+
+import Data.Monoid.Additive (Additive(..))
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 
 import Test.Spec (describe, it)
@@ -16,6 +20,9 @@ import Test.Cp11.Solutions
   , indent
   , cat
   , render
+
+  , sumArrayWriter
+  , collatz
   )
 
 main :: Effect Unit
@@ -55,3 +62,44 @@ main = runSpecAndExitProcess [ consoleReporter ] do
                 ]
             ]
         ) `shouldEqual` expectedText
+
+  describe "Exercises Group - The Writer Monad" do
+    describe "sumArrayWriter" do
+      it "should sum arrays" do
+        ( execWriter $ do
+            sumArrayWriter [ 1, 2, 3 ]
+            sumArrayWriter [ 4, 5 ]
+            sumArrayWriter [ 6 ]
+        ) `shouldEqual` (Additive 21)
+
+    describe "collatz" do
+      let
+        expected_11 =
+          Tuple 14 [ 11, 34, 17, 52, 26, 13, 40, 20, 10, 5, 16, 8, 4, 2, 1 ]
+        expected_15 =
+          Tuple 17
+            [ 15
+            , 46
+            , 23
+            , 70
+            , 35
+            , 106
+            , 53
+            , 160
+            , 80
+            , 40
+            , 20
+            , 10
+            , 5
+            , 16
+            , 8
+            , 4
+            , 2
+            , 1
+            ]
+
+      it "c = 11" do
+        collatz 11 `shouldEqual` expected_11
+
+      it "c = 15" do
+        collatz 15 `shouldEqual` expected_15

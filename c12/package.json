@@ -1,0 +1,11 @@
+{
+  "name": "c12",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "nodule",
+  "scripts": {
+    "start": "vite"
+  }
+}

@@ -1,0 +1,18 @@
+package:
+  name: c13
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - lists
+    - prelude
+    - quickcheck
+  run:
+    main: Cp13.Main
+  test:
+    main: Test.Cp13.Main
+    dependencies:
+      - spec
+      - spec-node
+      - spec-quickcheck

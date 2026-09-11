@@ -1,0 +1,21 @@
+package:
+  name: c04
+  dependencies:
+    - console
+    - effect
+    - filterable
+    - foldable-traversable
+    - maybe
+    - numbers
+    - prelude
+    - strings
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp4.Main
+  test:
+    main: Test.Cp4.Main
+    dependencies:
+      - integers
+      - spec
+      - spec-node

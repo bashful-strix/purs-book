@@ -1,0 +1,37 @@
+package:
+  name: c10
+  dependencies:
+    - argonaut
+    - argonaut-generic
+    - arrays
+    - bifunctors
+    - console
+    - css
+    - effect
+    - either
+    - foldable-traversable
+    - halogen
+    - halogen-css
+    - maybe
+    - prelude
+    - strings
+    - validation
+    - web-events
+    - web-uievents
+  run:
+    main: Cp10.Main
+  test:
+    main: Test.Cp10.Main
+    dependencies:
+      - aff
+      - aff-promise
+      - argonaut-codecs
+      - console
+      - control
+      - effect
+      - functions
+      - ordered-collections
+      - pairs
+      - spec
+      - spec-node
+      - tuples

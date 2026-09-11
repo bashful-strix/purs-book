@@ -1,0 +1,30 @@
+package:
+  name: c08
+  dependencies:
+    - arrays
+    - console
+    - css
+    - effect
+    - either
+    - foldable-traversable
+    - halogen
+    - halogen-css
+    - maybe
+    - prelude
+    - strings
+    - validation
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp8.Main
+  test:
+    main: Test.Cp8.Main
+    dependencies:
+      - control
+      - exceptions
+      - integers
+      - lists
+      - numbers
+      - spec
+      - spec-node
+      - st

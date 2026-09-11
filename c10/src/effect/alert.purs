@@ -1,0 +1,9 @@
+module Cp10.Effect.Alert where
+
+import Prelude
+
+import Effect (Effect)
+
+foreign import alert :: String -> Effect Unit
+
+foreign import confirm :: String -> Effect Boolean

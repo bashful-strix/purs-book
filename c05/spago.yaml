@@ -1,0 +1,21 @@
+package:
+  name: c05
+  dependencies:
+    - arrays
+    - console
+    - control
+    - effect
+    - foldable-traversable
+    - maybe
+    - prelude
+    - safe-coerce
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp5.Main
+  test:
+    main: Test.Cp5.Main
+    dependencies:
+      - spec
+      - spec-node
+      - tuples

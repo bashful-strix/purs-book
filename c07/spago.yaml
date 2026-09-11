@@ -1,0 +1,24 @@
+package:
+  name: c07
+  dependencies:
+    - console
+    - effect
+    - either
+    - foldable-traversable
+    - prelude
+    - strings
+    - validation
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp7.Main
+  test:
+    main: Test.Cp7.Main
+    dependencies:
+      - arrays
+      - integers
+      - lists
+      - maybe
+      - spec
+      - spec-node
+      - transformers

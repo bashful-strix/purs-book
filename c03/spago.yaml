@@ -1,0 +1,18 @@
+package:
+  name: c03
+  dependencies:
+    - console
+    - control
+    - effect
+    - lists
+    - maybe
+    - prelude
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp3.Main
+  test:
+    main: Test.Cp3.Main
+    dependencies:
+      - spec
+      - spec-node

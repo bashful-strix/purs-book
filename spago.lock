@@ -20,6 +20,25 @@
             "spec-node"
           ]
         }
+      },
+      "c03": {
+        "path": "c03",
+        "core": {
+          "dependencies": [
+            "console",
+            "control",
+            "effect",
+            "lists",
+            "maybe",
+            "prelude"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "spec",
+            "spec-node"
+          ]
+        }
       }
     },
     "package_set": {

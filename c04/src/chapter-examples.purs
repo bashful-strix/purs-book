@@ -42,3 +42,20 @@ pascal n k = (pascal n' k) + (pascal n' (k - 1))
   n' = n - 1
 
 -- }}}
+
+-- ex 2 {{{
+
+-- sameCity :: Person -> Person -> Boolean
+sameCity
+  :: ∀ c pr1 pr2 ar1 ar2
+   . Eq c
+  => { address :: { city :: c | ar1 } | pr1 }
+  -> { address :: { city :: c | ar2 } | pr2 }
+  -> Boolean
+sameCity { address: { city: c1 } } { address: { city: c2 } } = c1 == c2
+
+fromSingleton :: ∀ a. a -> Array a -> a
+fromSingleton _ [ a ] = a
+fromSingleton a0 _ = a0
+
+-- }}}

@@ -13,6 +13,9 @@ import Cp4.ChapterExamples
   ( factorial
   , binomial
   , pascal
+
+  , sameCity
+  , fromSingleton
   )
 import Cp4.Data.Person (Person)
 import Cp4.Data.Picture
@@ -77,3 +80,17 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       pascal 2 5 `shouldEqual` 0
       pascal 10 5 `shouldEqual` 252
       pascal 5 5 `shouldEqual` 1
+
+  describe "Exercise Group - Array and Record Patterns" do
+    it "Exercise - sameCity" do
+      sameCity john rose `shouldEqual` true
+      sameCity amy rose `shouldEqual` false
+      sameCity
+        { address: { city: 21, x: "" }, a: 0 }
+        { address: { city: 21, y: [] }, b: 'a' }
+        `shouldEqual` true
+
+    it "Exercise - fromSingleton" do
+      fromSingleton "default" [] `shouldEqual` "default"
+      fromSingleton "default" [ "B" ] `shouldEqual` "B"
+      fromSingleton "default" [ "B", "C", "D" ] `shouldEqual` "default"

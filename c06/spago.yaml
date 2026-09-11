@@ -1,0 +1,24 @@
+package:
+  name: c06
+  dependencies:
+    - console
+    - effect
+    - either
+    - foldable-traversable
+    - maybe
+    - prelude
+    - strings
+    - tuples
+  build:
+    pedanticPackages: true
+  run:
+    main: Cp6.Main
+  test:
+    main: Test.Cp6.Main
+    dependencies:
+      - arrays
+      - lists
+      - partial
+      - newtype
+      - spec
+      - spec-node

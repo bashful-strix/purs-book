@@ -84,6 +84,31 @@
             "tuples"
           ]
         }
+      },
+      "c06": {
+        "path": "c06",
+        "core": {
+          "dependencies": [
+            "console",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "maybe",
+            "prelude",
+            "strings",
+            "tuples"
+          ]
+        },
+        "test": {
+          "dependencies": [
+            "arrays",
+            "lists",
+            "newtype",
+            "partial",
+            "spec",
+            "spec-node"
+          ]
+        }
       }
     },
     "package_set": {

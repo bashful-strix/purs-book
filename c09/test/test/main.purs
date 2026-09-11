@@ -2,10 +2,13 @@ module Test.Cp9.Main where
 
 import Prelude
 
-import Data.Array ((..))
+import Data.Array ((..), filter)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Foldable (for_)
+import Data.Maybe (Maybe(..))
+import Data.Set as Set
+import Data.String (Pattern(..), split)
 
 import Effect (Effect)
 import Effect.Exception (message)
@@ -27,6 +30,10 @@ import Test.Cp9.Solutions
   , countCharacters
 
   , writeGet
+
+  , concatenateManyParallel
+  , getWithTimeout
+  , recurseFiles
   )
 
 -- node fs read changed since this was written? trailing newlines causing
@@ -134,3 +141,61 @@ main = runSpecAndExitProcess [ consoleReporter ] do
 
       -- deal with trailing \n from reading file
       (actualOutTxt <> "\n") `shouldEqual` expectedOutTxt
+
+  describe "Exercise Group - Parallel" do
+    it "concatenateManyParallel" do
+      let
+        inFiles = 1 .. 9 <#> \i ->
+          Path.concat [ inDir, "many", "file" <> show i <> ".txt" ]
+        outFile = Path.concat [ outDir, "many-concat-parallel.txt" ]
+        expectedOutFile = Path.concat [ inDir, "many-concat.txt" ]
+
+      concatenateManyParallel inFiles outFile
+      -- Check for valid concat
+      actualOutTxt <- readTextFile UTF8 outFile
+      expectedOutTxt <- readTextFile UTF8 expectedOutFile
+
+      actualOutTxt `shouldEqual` expectedOutTxt
+
+    describe "getWithTimeout" do
+      it "valid site" do
+        let expectedOutFile = Path.concat [ inDir, "user.txt" ]
+
+        actual <- getWithTimeout 10000.0 reqUrl
+        expected <- Just <$> readTextFile UTF8 expectedOutFile
+
+        -- deal with trailing \n from reading file
+        (actual <> pure "\n") `shouldEqual` expected
+
+      it "no response" do
+        actual <- getWithTimeout 10.0 "https://example.com:81"
+        actual `shouldEqual` Nothing
+
+  describe "recurseFiles" do
+    let recurseDir = Path.concat [ inDir, "tree" ]
+
+    it "many files" do
+      expectedTxt <- readTextFile UTF8 $
+        Path.concat [ recurseDir, "expected.txt" ]
+      let
+        -- altered this to deal with trailing newline from read
+        expected = Path.normalize <$>
+          ( filter (not <<< eq "") $ split
+              (Pattern "\n")
+              expectedTxt
+          )
+
+      actual <- recurseFiles $ Path.concat [ recurseDir, "root.txt" ]
+      let actualRelative = map (\f -> Path.relative recurseDir f) actual
+
+      (Set.fromFoldable actualRelative)
+        `shouldEqual` (Set.fromFoldable expected)
+
+    it "one file" do
+      let
+        file = Path.concat [ recurseDir, "c", "unused.txt" ]
+        expected = [ file ]
+
+      actual <- recurseFiles file
+
+      (Set.fromFoldable actual) `shouldEqual` (Set.fromFoldable expected)

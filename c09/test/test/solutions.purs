@@ -2,17 +2,21 @@ module Test.Cp9.Solutions where
 
 import Prelude
 
-import Data.Either (Either(..))
-import Data.Foldable (foldMap)
-import Data.String (length)
+import Control.Parallel (parOneOf, parTraverse)
 
-import Effect.Aff (Aff, Error, attempt, message)
+import Data.Array (filter, snoc)
+import Data.Either (Either(..))
+import Data.Foldable (fold, foldMap)
+import Data.Maybe (Maybe(..))
+import Data.String (Pattern(..), length, split)
+
+import Effect.Aff (Aff, Error, Milliseconds(..), attempt, delay, message)
 
 import Fetch (fetch)
 
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, writeTextFile)
-import Node.Path (FilePath)
+import Node.Path (FilePath, concat, dirname)
 
 -- ex 1 {{{
 
@@ -40,5 +44,32 @@ writeGet url o = do
   writeTextFile UTF8 o case r of
     Left e -> message e
     Right t -> t
+
+-- }}}
+
+-- ex 3 {{{
+
+concatenateManyParallel :: Array FilePath -> FilePath -> Aff Unit
+concatenateManyParallel fs o =
+  writeTextFile UTF8 o <<< fold =<< parTraverse (readTextFile UTF8) fs
+
+-- do ts <- parTraverse (readTextFile UTF8) fs
+--    writeTextFile UTF8 o (fold ts)
+
+getWithTimeout :: Number -> String -> Aff (Maybe String)
+getWithTimeout t url =
+  parOneOf
+    [ delay (Milliseconds t) $> Nothing
+    , fetch url {} >>= _.text <#> Just
+    ]
+
+recurseFiles :: FilePath -> Aff (Array FilePath)
+recurseFiles f = do
+  t <- readTextFile UTF8 f
+  let
+    links = filter (not <<< eq "") $ split (Pattern "\n") t
+    base = dirname f
+  fs <- parTraverse (\p -> recurseFiles $ concat [ base, p ]) links
+  pure $ fold fs `snoc` f
 
 -- }}}

@@ -1,6 +1,8 @@
 module Cp4.Data.Picture where
 
 import Prelude
+
+import Data.Maybe (Maybe(..))
 import Data.Foldable (foldl)
 import Data.Number (infinity)
 
@@ -62,6 +64,29 @@ showShape (Text l t) =
 showPoint :: Point -> String
 showPoint { x, y } =
   "(" <> show x <> ", " <> show y <> ")"
+
+-- ex 3 {{{
+
+circleAtOrigin :: Shape
+circleAtOrigin = Circle origin 10.0
+
+doubleScaleAndCentre :: Shape -> Shape
+doubleScaleAndCentre = case _ of
+  Circle _ r -> Circle origin (r * 2.0)
+  Rectangle _ w h -> Rectangle origin (w * 2.0) (h * 2.0)
+  Text _ t -> Text origin t
+  l@(Line a b) -> Line a' b'
+    where
+    double = { x: 2.0, y: 2.0 }
+    c = getCentre l
+    a' = (a - c) * double
+    b' = (b - c) * double
+
+shapeText :: Shape -> Maybe String
+shapeText (Text _ t) = Just t
+shapeText _ = Nothing
+
+-- }}}
 
 type Picture = Array Shape
 

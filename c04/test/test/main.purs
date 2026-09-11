@@ -2,6 +2,8 @@ module Test.Cp4.Main where
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
+
 import Effect (Effect)
 
 import Test.Spec (describe, it)
@@ -22,6 +24,11 @@ import Cp4.Data.Picture
   ( Picture
   , Shape(..)
   , origin
+  , getCentre
+
+  , circleAtOrigin
+  , doubleScaleAndCentre
+  , shapeText
   )
 
 john :: Person
@@ -94,3 +101,30 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       fromSingleton "default" [] `shouldEqual` "default"
       fromSingleton "default" [ "B" ] `shouldEqual` "B"
       fromSingleton "default" [ "B", "C", "D" ] `shouldEqual` "default"
+
+  describe "Exercise Group - Algebraic Data Types" do
+    it "Exercise - circleAtOrigin" do
+      getCentre circleAtOrigin `shouldEqual` origin
+
+    it "Exercise - doubleScaleAndCentre" do
+      doubleScaleAndCentre (Circle origin 5.0)
+        `shouldEqual` (Circle origin 10.0)
+      doubleScaleAndCentre (Circle { x: 2.0, y: 2.0 } 5.0)
+        `shouldEqual` (Circle origin 10.0)
+      doubleScaleAndCentre (Rectangle { x: 0.0, y: 0.0 } 5.0 5.0)
+        `shouldEqual` (Rectangle origin 10.0 10.0)
+      doubleScaleAndCentre (Rectangle { x: 30.0, y: 30.0 } 20.0 20.0)
+        `shouldEqual` (Rectangle origin 40.0 40.0)
+      doubleScaleAndCentre (Line { x: -2.0, y: -2.0 } { x: 2.0, y: 2.0 })
+        `shouldEqual` (Line { x: -4.0, y: -4.0 } { x: 4.0, y: 4.0 })
+      doubleScaleAndCentre (Line { x: 0.0, y: 4.0 } { x: 4.0, y: 8.0 })
+        `shouldEqual` (Line { x: -4.0, y: -4.0 } { x: 4.0, y: 4.0 })
+      doubleScaleAndCentre (Text { x: 4.0, y: 6.0 } "Hello .purs!")
+        `shouldEqual` (Text { x: 0.0, y: 0.0 } "Hello .purs!")
+
+    it "Exercise - shapeText" do
+      shapeText (Text origin "Hello .purs!")
+        `shouldEqual` (Just "Hello .purs!")
+      shapeText (Circle origin 1.0) `shouldEqual` Nothing
+      shapeText (Rectangle origin 1.0 1.0) `shouldEqual` Nothing
+      shapeText (Line origin { x: 1.0, y: 1.0 }) `shouldEqual` Nothing

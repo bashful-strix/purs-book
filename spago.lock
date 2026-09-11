@@ -48,6 +48,7 @@
             "console",
             "effect",
             "foldable-traversable",
+            "maybe",
             "numbers",
             "prelude"
           ]

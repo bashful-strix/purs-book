@@ -31,6 +31,11 @@ import Cp5.ChapterExamples
 import Test.Cp5.Solutions
   ( isEven
   , countEven
+
+  , squared
+  , keepNonNegative
+  , keepNonNegativeRewrite
+  , (<$?>)
   )
 main :: Effect Unit
 main = runSpecAndExitProcess [ consoleReporter ] do
@@ -108,6 +113,32 @@ main = runSpecAndExitProcess [ consoleReporter ] do
 
       it "[0, 1, 19, 20] has 2" do
         countEven [ 0, 1, 19, 20 ] `shouldEqual` 2
+
+  describe "Exercise Group - Maps, Infix Operators, and Filtering" do
+    describe "Exercise - squared" do
+      it "Do nothing with empty array" do
+        squared [] `shouldEqual` []
+
+      it "Calculate squares" do
+        squared [ 0.0, 1.0, 2.0, 3.0, 100.0 ]
+          `shouldEqual` [ 0.0, 1.0, 4.0, 9.0, 10000.0 ]
+
+    describe "Exercise - keepNonNegative" do
+      it "Do nothing with empty array" do
+        keepNonNegative [] `shouldEqual` []
+
+      it "Filter negative numbers" do
+        keepNonNegative [ -1.5, -1.0, 0.0, -0.1, 2.0, 3.0, -4.0 ]
+          `shouldEqual` [ 0.0, 2.0, 3.0 ]
+
+    describe "Exercise - <$?> infix operator for filter" do
+      it "Define <$?> operator for filter" do
+        ((_ == 1) <$?> [ 1, 2, 3, 1, 2, 3 ])
+          `shouldEqual` [ 1, 1 ]
+
+      it "keepNonNegativeRewrite " do
+        keepNonNegativeRewrite [ -1.5, -1.0, 0.0, -0.1, 2.0, 3.0, -4.0 ]
+          `shouldEqual` [ 0.0, 2.0, 3.0 ]
 allFileAndDirectoryNames :: Array (String)
 allFileAndDirectoryNames =
   [ "/"

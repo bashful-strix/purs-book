@@ -9,7 +9,14 @@ import Test.Spec.Assertions (shouldEqual)
 import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
 
-import Test.Cp11.Solutions (testParens)
+import Test.Cp11.Solutions
+  ( testParens
+
+  , line
+  , indent
+  , cat
+  , render
+  )
 
 main :: Effect Unit
 main = runSpecAndExitProcess [ consoleReporter ] do
@@ -28,3 +35,23 @@ main = runSpecAndExitProcess [ consoleReporter ] do
       runTestParens false ")"
       runTestParens false "(()()"
       runTestParens false ")("
+
+  describe "Exercises Group - The Reader Monad" do
+    describe "indents" do
+      let
+        expectedText =
+          "Here is some indented text:\n\
+          \  I am indented\n\
+          \  So am I\n\
+          \    I am even more indented"
+
+      it "should render with indentations" do
+        ( render $ cat
+            [ line "Here is some indented text:"
+            , indent $ cat
+                [ line "I am indented"
+                , line "So am I"
+                , indent $ line "I am even more indented"
+                ]
+            ]
+        ) `shouldEqual` expectedText

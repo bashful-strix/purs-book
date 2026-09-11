@@ -25,6 +25,8 @@ import Test.Cp9.Solutions
   ( concatenateFiles
   , concatenateMany
   , countCharacters
+
+  , writeGet
   )
 
 -- node fs read changed since this was written? trailing newlines causing
@@ -118,3 +120,17 @@ main = runSpecAndExitProcess [ consoleReporter ] do
                   <> "foof.txt'"
               )
           )
+
+  describe "Exercise Group - HTTP" do
+    it "writeGet" do
+      let
+        outFile = Path.concat [ outDir, "user.txt" ]
+        expectedOutFile = Path.concat [ inDir, "user.txt" ]
+
+      writeGet reqUrl outFile
+      -- Check for valid write
+      actualOutTxt <- readTextFile UTF8 outFile
+      expectedOutTxt <- readTextFile UTF8 expectedOutFile
+
+      -- deal with trailing \n from reading file
+      (actualOutTxt <> "\n") `shouldEqual` expectedOutTxt

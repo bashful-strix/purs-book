@@ -2,11 +2,13 @@ module Test.Cp9.Solutions where
 
 import Prelude
 
-import Data.Either (Either)
+import Data.Either (Either(..))
 import Data.Foldable (foldMap)
 import Data.String (length)
 
-import Effect.Aff (Aff, Error, attempt)
+import Effect.Aff (Aff, Error, attempt, message)
+
+import Fetch (fetch)
 
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile, writeTextFile)
@@ -27,5 +29,16 @@ concatenateMany fs o =
 countCharacters :: FilePath -> Aff (Either Error Int)
 countCharacters f =
   attempt $ length <$> readTextFile UTF8 f
+
+-- }}}
+
+-- ex 2 {{{
+
+writeGet :: String -> FilePath -> Aff Unit
+writeGet url o = do
+  r <- attempt (_.text =<< fetch url {})
+  writeTextFile UTF8 o case r of
+    Left e -> message e
+    Right t -> t
 
 -- }}}

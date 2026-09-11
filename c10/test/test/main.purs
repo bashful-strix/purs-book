@@ -7,6 +7,7 @@ import Data.Either (Either(..))
 import Data.Function.Uncurried (runFn2, runFn3)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.Pair (Pair(..))
 import Data.Tuple (Tuple(..))
 
 import Effect (Effect)
@@ -19,7 +20,9 @@ import Test.Spec.Reporter.Console (consoleReporter)
 import Test.Spec.Runner.Node (runSpecAndExitProcess)
 
 import Test.Cp10.Examples
-  ( addComplex
+  ( Complex
+  , Undefined
+  , addComplex
   , addComplexDecodedBroken
   , addComplexDecodedWorking
   , bold
@@ -41,6 +44,7 @@ import Test.Cp10.Examples
   , square
   , uncurriedAdd
   , uncurriedSum
+  , undefinedHead
   , unsafeHead
   , yell
   )
@@ -51,6 +55,9 @@ import Test.Cp10.Solutions
   , volumeArrow
 
   , cumulativeSumsComplex
+
+  , quadraticRoots
+  , toMaybe
   )
 
 main :: Effect Unit
@@ -198,3 +205,46 @@ main = runSpecAndExitProcess [ consoleReporter ] do
             , { real: 4.0, imag: 6.0 }
             , { real: 9.0, imag: 12.0 }
             ]
+
+  describe "Exercise Group - Beyond Simple Types" do
+    describe "Exercise - quadraticRoots" do
+      let
+        helper testName poly r1 r2 =
+          it testName do
+            (orderCpx $ quadraticRoots poly)
+              `shouldEqual` (orderCpx $ Pair r1 r2)
+
+      helper "Real"
+        { a: 1.0, b: 2.0, c: -3.0 }
+        { real: 1.0, imag: 0.0 }
+        { real: -3.0, imag: 0.0 }
+
+      helper "Imaginary"
+        { a: 4.0, b: 0.0, c: 16.0 }
+        { real: 0.0, imag: 2.0 }
+        { real: 0.0, imag: -2.0 }
+
+      helper "Complex"
+        { a: 2.0, b: 2.0, c: 5.0 }
+        { real: -0.5, imag: 1.5 }
+        { real: -0.5, imag: -1.5 }
+
+      helper "Repeated"
+        { a: 3.0, b: -6.0, c: 3.0 }
+        { real: 1.0, imag: 0.0 }
+        { real: 1.0, imag: 0.0 }
+
+    describe "Exercise - toMaybe" do
+      it "Nothing" do
+        (toMaybe $ (undefinedHead [] :: Undefined Int)) `shouldEqual` Nothing
+
+      it "Just" do
+        (toMaybe $ undefinedHead [1]) `shouldEqual` (Just 1)
+
+-- Put in ascending order by real, then imag components
+orderCpx :: Pair Complex -> Pair Complex
+orderCpx (Pair c1 c2)
+  | c1.real < c2.real = Pair c1 c2
+  | c1.real > c2.real = Pair c2 c1
+  | c1.imag < c2.imag = Pair c1 c2
+  | otherwise = Pair c2 c1

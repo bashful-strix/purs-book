@@ -21,3 +21,26 @@ export const cumulativeSumsComplex = xs => {
 };
 
 // }}}
+
+// ex 3 {{{
+
+// cheat for this one - not worth it
+export const quadraticRootsImpl = pair => ({ a, b, c }) => {
+  const radicand = b * b - 4 * a * c;
+  if (radicand >= 0) {
+    const rt = Math.sqrt(radicand);
+    return pair
+      ({ real: (-b + rt) / (2 * a), imag: 0 })
+      ({ real: (-b - rt) / (2 * a), imag: 0 });
+  } else {
+    const rt = Math.sqrt(-radicand);
+    return pair
+      ({ real: -b / (2 * a), imag: rt / (2 * a) })
+      ({ real: -b / (2 * a), imag: -rt / (2 * a) });
+  }
+};
+
+export const toMaybeIml = just => nothing => a =>
+  a === undefined ? nothing : just(a);
+
+// }}}
